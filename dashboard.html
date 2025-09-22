@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <style>
+    body{margin:0;font-family:"Poppins",sans-serif;display:flex;height:100vh;background:#f0f2ff;}
+    .sidebar{width:220px;background:#7494ec;color:#fff;display:flex;flex-direction:column;padding:20px 0;}
+    .sidebar h2{text-align:center;margin-bottom:30px;}
+    .sidebar a{color:#fff;padding:12px 20px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:.3s;}
+    .sidebar a:hover{background:rgba(255,255,255,0.2);}
+    .sidebar .logout{margin-top:auto;color:#f8d7da;}
+    .content{flex:1;padding:20px;overflow-y:auto;}
+    .content h1{color:#333;margin-bottom:20px;}
+    .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
+    .form-group{margin-bottom:15px;}
+    .form-group label{display:block;margin-bottom:5px;font-weight:500;}
+    .form-group input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;}
+    .btn-save{background:#7494ec;color:#fff;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:600;}
+    .btn-save:hover{background:#5a78c7;}
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Dashboard</h2>
+    <a href="#"><i class='bx bxs-user-plus'></i>Tambah Siswa</a>
+    <a href="#"><i class='bx bxs-group'></i>Daftar Siswa</a>
+    <a href="index.html" class="logout"><i class='bx bx-log-out'></i>Logout</a>
+  </div>
+
+  <div class="content">
+    <h1>Tambah Siswa</h1>
+    <div class="card">
+      <form id="addStudentForm">
+        <div class="form-group">
+          <label>Nama Siswa</label>
+          <input type="text" required>
+        </div>
+        <div class="form-group">
+          <label>Kelas</label>
+          <input type="text" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" required>
+        </div>
+        <button type="submit" class="btn-save">Simpan</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const addStudentForm = document.getElementById('addStudentForm');
+    addStudentForm.addEventListener('submit',(e)=>{
+      e.preventDefault();
+      alert("Data siswa berhasil disimpan!");
+      addStudentForm.reset();
+    });
+  </script>
+</body>
+</html>
