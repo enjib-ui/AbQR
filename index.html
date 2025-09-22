@@ -13,19 +13,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
     *{margin:0;padding:0;box-sizing:border-box;font-family:"Poppins",sans-serif;}
     body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:linear-gradient(90deg,#e2e2e2,#c9d6ff);}
-    .container{
-  position:relative;
-  width: 100%;           /* ✅ dari fix 850px jadi fleksibel */
-  max-width: 850px;      /* ✅ batas maksimal tetap 850px */
-  height: auto;          /* ✅ biar menyesuaikan konten */
-  min-height: 550px;     /* ✅ tinggi minimal */
-  background:#fff;
-  margin:20px;
-  border-radius:30px;
-  box-shadow:0 0 30px rgba(0,0,0,.2);
-  overflow:hidden;
-}
-
+    .container{position:relative;width:850px;height:550px;background:#fff;margin:20px;border-radius:30px;box-shadow:0 0 30px rgba(0,0,0,.2);overflow:hidden;}
     .container h1{font-size:36px;margin:-10px 0;}
     .container p{font-size:14.5px;margin:15px 0;}
     form{width:100%;}
@@ -50,42 +38,6 @@
     .toggle-panel.toggle-right{right:-50%;transition-delay:.6s;}
     .container.active .toggle-panel.toggle-right{right:0;transition-delay:1.2s;}
     .toggle-panel .btn{width:160px;height:46px;background:transparent;border:2px solid #fff;}
-    @media (max-width: 768px) {
-  body {
-    align-items: flex-start;
-    padding: 20px;
-  }
-
-  .container {
-    border-radius: 20px;
-    margin: 0;
-    height: auto;
-  }
-
-  .form-box {
-    position: relative;
-    width: 100%;       /* ✅ form jadi full lebar HP */
-    height: auto;
-    padding: 20px;
-  }
-
-  .toggle-box {
-    display: none;     /* ✅ sembunyikan animasi toggle di HP */
-  }
-
-  .form-box.register {
-    display: none;     /* ✅ default sembunyi register */
-  }
-
-  .container.active .form-box.register {
-    display: block;    /* ✅ kalau klik register, tampil */
-  }
-
-  .container.active .form-box.login {
-    display: none;     /* ✅ sembunyikan login saat register aktif */
-  }
-    }
-    
   </style>
 </head>
 <body>
