@@ -11,7 +11,7 @@
     .sidebar h2{text-align:center;margin-bottom:30px;}
     .sidebar a{color:#fff;padding:12px 20px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:.3s;}
     .sidebar a:hover{background:rgba(255,255,255,0.2);}
-    .sidebar .logout{margin-top:auto;color:#f8d7da;}
+    .sidebar .logout{margin-top:auto;color:#f8d7da;cursor:pointer;}
     .content{flex:1;padding:20px;overflow-y:auto;}
     .content h1{color:#333;margin-bottom:20px;}
     .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
@@ -27,7 +27,7 @@
     <h2>Dashboard</h2>
     <a href="#"><i class='bx bxs-user-plus'></i>Tambah Siswa</a>
     <a href="#"><i class='bx bxs-group'></i>Daftar Siswa</a>
-    <a href="index.html" class="logout"><i class='bx bx-log-out'></i>Logout</a>
+    <a id="logoutBtn" class="logout"><i class='bx bx-log-out'></i>Logout</a>
   </div>
 
   <div class="content">
@@ -51,11 +51,47 @@
     </div>
   </div>
 
-  <script>
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBKFobPaqznvZdOMCXCh9D4d9jVEopq6DQ",
+      authDomain: "abqr-7ec2a.firebaseapp.com",
+      projectId: "abqr-7ec2a",
+      storageBucket: "abqr-7ec2a.firebasestorage.app",
+      messagingSenderId: "908334703141",
+      appId: "1:908334703141:web:3dad64af321d59f55395cc"
+    };
+
+    // Init Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Cek login status
+    onAuthStateChanged(auth, (user)=>{
+      if(!user){
+        // Kalau belum login → kembali ke index
+        window.location.href = "index.html";
+      }
+    });
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", ()=>{
+      signOut(auth).then(()=>{
+        window.location.href = "index.html";
+      }).catch(err=>{
+        alert("Gagal logout: " + err.message);
+      });
+    });
+
+    // Tambah siswa (sementara dummy)
     const addStudentForm = document.getElementById('addStudentForm');
     addStudentForm.addEventListener('submit',(e)=>{
       e.preventDefault();
-      alert("Data siswa berhasil disimpan!");
+      alert("Data siswa berhasil disimpan (dummy)!");
       addStudentForm.reset();
     });
   </script>
