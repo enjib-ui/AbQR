@@ -38,6 +38,65 @@
     .toggle-panel.toggle-right{right:-50%;transition-delay:.6s;}
     .container.active .toggle-panel.toggle-right{right:0;transition-delay:1.2s;}
     .toggle-panel .btn{width:160px;height:46px;background:transparent;border:2px solid #fff;}
+    /* 🔹 Tampilan Mobile Friendly */
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .container h1 { font-size: 22px; }
+  .container p { font-size: 13px; }
+
+  .form-box {
+    width: 100%;
+    height: 60%;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 20px;
+    transition: .6s ease-in-out;
+  }
+
+  /* Login geser ke atas saat toggle */
+  .container.active .form-box.login { bottom: 100%; }
+
+  /* Register geser dari atas */
+  .form-box.register {
+    top: -100%;
+    width: 100%;
+    height: 60%;
+    visibility: visible;
+  }
+  .container.active .form-box.register { top: 0; }
+
+  /* Toggle jadi vertikal */
+  .toggle-box::before {
+    left: 0;
+    top: -250%;
+    width: 100%;
+    height: 300%;
+    border-radius: 50%;
+  }
+  .container.active .toggle-box::before { top: 50%; }
+
+  .toggle-panel {
+    width: 100%;
+    height: 40%;
+  }
+  .toggle-panel.toggle-left { top: 0; }
+  .container.active .toggle-panel.toggle-left { top: -40%; }
+  .toggle-panel.toggle-right { bottom: -40%; }
+  .container.active .toggle-panel.toggle-right { bottom: 0; }
+
+  /* Ukuran input & tombol lebih kecil */
+  .btn { height: 42px; font-size: 14px; }
+  .input-box input { font-size: 14px; padding: 12px 40px 12px 14px; }
+  .social-icons a { font-size: 14px; padding: 8px; }
+               }
+    
   </style>
 </head>
 <body>
