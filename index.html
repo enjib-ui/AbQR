@@ -170,6 +170,45 @@
       });
   });
 </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBKFobPaqznvZdOMCXCh9D4d9jVEopq6DQ",
+    authDomain: "abqr-7ec2a.firebaseapp.com",
+    projectId: "abqr-7ec2a",
+    storageBucket: "abqr-7ec2a.firebasestorage.app",
+    messagingSenderId: "908334703141",
+    appId: "1:908334703141:web:3dad64af321d59f55395cc"
+  };
+
+  // Init Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // ✅ Cek status login
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("Login sebagai:", user.email);
+      // bisa tampilkan nama/email user di dashboard kalau mau
+      document.getElementById("userEmail").innerText = user.email;
+    } else {
+      // kalau tidak ada user, balik ke login
+      window.location.href = "index.html";
+    }
+  });
+
+  // ✅ Logout
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    signOut(auth).then(() => {
+      window.location.href = "index.html";
+    }).catch((err) => {
+      alert("Error logout: " + err.message);
+    });
+  });
+  </script>
   
 </body>
   </html>
