@@ -52,29 +52,60 @@
     .toggle-panel .btn{width:160px;height:46px;background:transparent;border:2px solid #fff;}
     
     @media (max-width: 768px) {
-  .container {
-    width: 100%;
-    height: auto;
-    border-radius: 20px;
-    margin: 10px;
-  }
-
   .form-box {
+    position: absolute;
+    bottom: 0;
     width: 100%;
-    height: 70%;
+    height: 70%;      /* ✅ form ambil 70% layar */
     padding: 20px;
+    transition: .6s ease-in-out;
   }
 
-  .toggle-box {
-    display: block;   /* ✅ tetap tampilkan animasi toggle */
+  /* 🔥 saat container.active → login geser ke atas */
+  .container.active .form-box.login {
+    bottom: 100%;
   }
 
+  /* 🔥 register default di luar layar atas */
+  .form-box.register {
+    top: -100%;
+    visibility: visible;
+  }
+  .container.active .form-box.register {
+    top: 0;
+  }
+                  }
+
+
+  .toggle-box::before {
+  left: 0;
+  top: -250%;
+  width: 100%;
+  height: 300%;
+  border-radius: 50%;   /* ✅ bulatan besar biar transisi smooth */
+}
+.container.active .toggle-box::before {
+  top: 50%;
+    }
+    
   .toggle-panel {
-    width: 100%;
-    height: 30%;
-    font-size: 14px;
-    padding: 10px;
-  }
+  width: 100%;
+  height: 30%;
+  top: 0;
+}
+
+.toggle-panel.toggle-left {
+  top: 0;
+}
+
+.toggle-panel.toggle-right {
+  bottom: -30%;
+}
+
+.container.active .toggle-panel.toggle-right {
+  bottom: 0;
+    }
+    
 }
 
     
