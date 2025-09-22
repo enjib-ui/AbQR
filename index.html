@@ -119,12 +119,11 @@
     appId: "1:908334703141:web:3dad64af321d59f55395cc"
   };
 
-  // Init Firebase
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  // Toggle
+  // Toggle animasi
   const container = document.querySelector('.container');
   document.querySelector('.register-btn').addEventListener('click',()=>container.classList.add('active'));
   document.querySelector('.login-btn').addEventListener('click',()=>container.classList.remove('active'));
@@ -155,7 +154,7 @@
       .catch(err=> alert("Error: " + err.message));
   });
 
-  // ✅ Google Login
+  // ✅ Login Google
   document.getElementById("googleLogin").addEventListener("click",(e)=>{
     e.preventDefault();
     signInWithPopup(auth, provider)
@@ -170,30 +169,5 @@
       });
   });
 </script>
-<script type="module">
-
-  // ✅ Cek status login
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("Login sebagai:", user.email);
-      // bisa tampilkan nama/email user di dashboard kalau mau
-      document.getElementById("userEmail").innerText = user.email;
-    } else {
-      // kalau tidak ada user, balik ke login
-      window.location.href = "index.html";
-    }
-  });
-
-  // ✅ Logout
-  document.getElementById("logoutBtn").addEventListener("click", () => {
-    signOut(auth).then(() => {
-      window.location.href = "index.html";
-    }).catch((err) => {
-      alert("Error logout: " + err.message);
-    });
-  });
-  </script>
-  
 </body>
-  </html>
-  
+</html>
