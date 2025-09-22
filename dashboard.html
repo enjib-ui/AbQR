@@ -8,10 +8,11 @@
   <style>
     body{margin:0;font-family:"Poppins",sans-serif;display:flex;height:100vh;background:#f0f2ff;}
     .sidebar{width:220px;background:#7494ec;color:#fff;display:flex;flex-direction:column;padding:20px 0;}
-    .sidebar h2{text-align:center;margin-bottom:30px;}
+    .sidebar h2{text-align:center;margin-bottom:10px;}
+    .sidebar p{font-size:13px;text-align:center;margin-bottom:30px;color:#e0e0ff;}
     .sidebar a{color:#fff;padding:12px 20px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:.3s;}
     .sidebar a:hover{background:rgba(255,255,255,0.2);}
-    .sidebar .logout{margin-top:auto;color:#f8d7da;cursor:pointer;}
+    .sidebar .logout{margin-top:auto;color:#f8d7da;}
     .content{flex:1;padding:20px;overflow-y:auto;}
     .content h1{color:#333;margin-bottom:20px;}
     .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
@@ -23,35 +24,38 @@
   </style>
 </head>
 <body>
+  <!-- Sidebar -->
   <div class="sidebar">
     <h2>Dashboard</h2>
+    <p>Logged in as <br><span id="userEmail"></span></p>
     <a href="#"><i class='bx bxs-user-plus'></i>Tambah Siswa</a>
     <a href="#"><i class='bx bxs-group'></i>Daftar Siswa</a>
-    <a id="logoutBtn" class="logout"><i class='bx bx-log-out'></i>Logout</a>
+    <a href="#" id="logoutBtn" class="logout"><i class='bx bx-log-out'></i>Logout</a>
   </div>
 
+  <!-- Content -->
   <div class="content">
     <h1>Tambah Siswa</h1>
     <div class="card">
       <form id="addStudentForm">
         <div class="form-group">
           <label>Nama Siswa</label>
-          <input type="text" required>
+          <input type="text" id="studentName" required>
         </div>
         <div class="form-group">
           <label>Kelas</label>
-          <input type="text" required>
+          <input type="text" id="studentClass" required>
         </div>
         <div class="form-group">
           <label>Email</label>
-          <input type="email" required>
+          <input type="email" id="studentEmail" required>
         </div>
         <button type="submit" class="btn-save">Simpan</button>
       </form>
     </div>
   </div>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase Auth -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -66,32 +70,36 @@
       appId: "1:908334703141:web:3dad64af321d59f55395cc"
     };
 
-    // Init Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Cek login status
-    onAuthStateChanged(auth, (user)=>{
-      if(!user){
-        // Kalau belum login → kembali ke index
+    // ✅ Cek login
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("userEmail").innerText = user.email;
+      } else {
         window.location.href = "index.html";
       }
     });
 
-    // Logout
-    document.getElementById("logoutBtn").addEventListener("click", ()=>{
-      signOut(auth).then(()=>{
+    // ✅ Logout
+    document.getElementById("logoutBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
         window.location.href = "index.html";
-      }).catch(err=>{
-        alert("Gagal logout: " + err.message);
+      }).catch((err) => {
+        alert("Error logout: " + err.message);
       });
     });
 
-    // Tambah siswa (sementara dummy)
+    // ✅ Simpan data siswa (sementara alert saja)
     const addStudentForm = document.getElementById('addStudentForm');
     addStudentForm.addEventListener('submit',(e)=>{
       e.preventDefault();
-      alert("Data siswa berhasil disimpan (dummy)!");
+      const name = document.getElementById("studentName").value;
+      const kelas = document.getElementById("studentClass").value;
+      const email = document.getElementById("studentEmail").value;
+      alert(`Data siswa disimpan:\nNama: ${name}\nKelas: ${kelas}\nEmail: ${email}`);
       addStudentForm.reset();
     });
   </script>
