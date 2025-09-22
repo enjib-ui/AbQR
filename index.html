@@ -51,40 +51,25 @@
     .container.active .toggle-panel.toggle-right{right:0;transition-delay:1.2s;}
     .toggle-panel .btn{width:160px;height:46px;background:transparent;border:2px solid #fff;}
     @media (max-width: 768px) {
-  body {
-    align-items: flex-start;
-    padding: 20px;
-  }
-
-  .container {
-    border-radius: 20px;
-    margin: 0;
-    height: auto;
+  .toggle-box { 
+    display: none;   /* tetap sembunyikan toggle di HP */ 
   }
 
   .form-box {
     position: relative;
-    width: 100%;       /* ✅ form jadi full lebar HP */
+    width: 100%;
     height: auto;
     padding: 20px;
   }
 
-  .toggle-box {
-    display: none;     /* ✅ sembunyikan animasi toggle di HP */
-  }
-
+  .form-box.login,
   .form-box.register {
-    display: none;     /* ✅ default sembunyi register */
-  }
-
-  .container.active .form-box.register {
-    display: block;    /* ✅ kalau klik register, tampil */
-  }
-
-  .container.active .form-box.login {
-    display: none;     /* ✅ sembunyikan login saat register aktif */
+    visibility: visible !important;  /* 🔥 paksa selalu muncul */
+    display: block;                  /* 🔥 tampil normal */
+    margin-bottom: 20px;             /* kasih jarak antar form */
   }
     }
+    
     
   </style>
 </head>
