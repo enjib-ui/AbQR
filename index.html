@@ -106,7 +106,8 @@
     signInWithEmailAndPassword, 
     createUserWithEmailAndPassword, 
     GoogleAuthProvider, 
-    signInWithPopup 
+    signInWithRedirect, 
+    getRedirectResult
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
   // Firebase config
@@ -154,20 +155,25 @@
       .catch(err=> alert("Error: " + err.message));
   });
 
-  // ✅ Login Google
-  document.getElementById("googleLogin").addEventListener("click",(e)=>{
-    e.preventDefault();
-    signInWithPopup(auth, provider)
-      .then(result=>{
-        const user = result.user;
-        alert("Login Google sukses: " + user.email);
-        window.location.href="dashboard.html";
-      })
-      .catch(err=>{
-        console.error(err);
-        alert("Error Google: " + err.message);
-      });
+  // ✅ Login Google pakai Redirect (lebih aman untuk GitHub Pages & mobile)
+document.getElementById("googleLogin").addEventListener("click",(e)=>{
+  e.preventDefault();
+  signInWithRedirect(auth, provider);
+});
+
+// ✅ Ambil hasil login setelah redirect balik ke index.html
+getRedirectResult(auth)
+  .then((result) => {
+    if (result && result.user) {
+      alert("Login Google sukses: " + result.user.email);
+      window.location.href = "dashboard.html";
+    }
+  })
+  .catch((err) => {
+    console.error("Error Google:", err);
+    alert("Error Google: " + err.message);
   });
+  
 </script>
 </body>
 </html>
