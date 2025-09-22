@@ -99,69 +99,78 @@
   </div>
 
   <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { 
+    getAuth, 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, 
+    GoogleAuthProvider, 
+    signInWithPopup 
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyBKFobPaqznvZdOMCXCh9D4d9jVEopq6DQ",
-      authDomain: "abqr-7ec2a.firebaseapp.com",
-      projectId: "abqr-7ec2a",
-      storageBucket: "abqr-7ec2a.firebasestorage.app",
-      messagingSenderId: "908334703141",
-      appId: "1:908334703141:web:3dad64af321d59f55395cc"
-    };
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBKFobPaqznvZdOMCXCh9D4d9jVEopq6DQ",
+    authDomain: "abqr-7ec2a.firebaseapp.com",
+    projectId: "abqr-7ec2a",
+    storageBucket: "abqr-7ec2a.firebasestorage.app",
+    messagingSenderId: "908334703141",
+    appId: "1:908334703141:web:3dad64af321d59f55395cc"
+  };
 
-    // Init Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+  // Init Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
 
-    // Toggle
-    const container = document.querySelector('.container');
-    document.querySelector('.register-btn').addEventListener('click',()=>container.classList.add('active'));
-    document.querySelector('.login-btn').addEventListener('click',()=>container.classList.remove('active'));
+  // Toggle
+  const container = document.querySelector('.container');
+  document.querySelector('.register-btn').addEventListener('click',()=>container.classList.add('active'));
+  document.querySelector('.login-btn').addEventListener('click',()=>container.classList.remove('active'));
 
-    // Register
-    const registerForm = document.getElementById("registerForm");
-    registerForm.addEventListener("submit",(e)=>{
-      e.preventDefault();
-      const email = document.getElementById("registerEmail").value;
-      const password = document.getElementById("registerPassword").value;
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(userCredential=>{
-          alert("Akun berhasil dibuat: " + userCredential.user.email);
-          window.location.href="dashboard.html";
-        })
-        .catch(err=> alert("Error: " + err.message));
-    });
+  // Register Email
+  document.getElementById("registerForm").addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const email = document.getElementById("registerEmail").value;
+    const password = document.getElementById("registerPassword").value;
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(userCredential=>{
+        alert("Akun berhasil dibuat: " + userCredential.user.email);
+        window.location.href="dashboard.html";
+      })
+      .catch(err=> alert("Error: " + err.message));
+  });
 
-    // Login Email
-    const loginForm = document.getElementById("loginForm");
-    loginForm.addEventListener("submit",(e)=>{
-      e.preventDefault();
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
-      signInWithEmailAndPassword(auth, email, password)
-        .then(userCredential=>{
-          alert("Login sukses: " + userCredential.user.email);
-          window.location.href="dashboard.html";
-        })
-        .catch(err=> alert("Error: " + err.message));
-    });
+  // Login Email
+  document.getElementById("loginForm").addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+    signInWithEmailAndPassword(auth, email, password)
+      .then(userCredential=>{
+        alert("Login sukses: " + userCredential.user.email);
+        window.location.href="dashboard.html";
+      })
+      .catch(err=> alert("Error: " + err.message));
+  });
 
-    // Google Login
-    document.getElementById("googleLogin").addEventListener("click",(e)=>{
-      e.preventDefault();
-      signInWithPopup(auth, provider)
-        .then(result=>{
-          alert("Login Google sukses: " + result.user.email);
-          window.location.href="dashboard.html";
-        })
-        .catch(err=> alert("Error Google: " + err.message));
-    });
-  </script>
+  // ✅ Google Login
+  document.getElementById("googleLogin").addEventListener("click",(e)=>{
+    e.preventDefault();
+    signInWithPopup(auth, provider)
+      .then(result=>{
+        const user = result.user;
+        alert("Login Google sukses: " + user.email);
+        window.location.href="dashboard.html";
+      })
+      .catch(err=>{
+        console.error(err);
+        alert("Error Google: " + err.message);
+      });
+  });
+</script>
+  
 </body>
   </html>
   
