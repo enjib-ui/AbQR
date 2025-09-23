@@ -276,27 +276,36 @@ async function importSiswa(){
   showPopup("Import Excel selesai!");
 }
 
-// Tambah row + QR (cek duplikat di tabel)
+// Tambah row + QR + tombol download
 function addSiswaRow(id, nama, kelas, pelajaran, sekolah){
   const tbody = document.getElementById("siswaTable");
+
   // Cek apakah sudah ada di tabel
-  const exists = Array.from(tbody.children).some(tr => tr.children[0].innerText===nama && tr.children[1].innerText===kelas);
+  const exists = Array.from(tbody.children)
+    .some(tr => tr.children[0].innerText === nama && tr.children[1].innerText === kelas);
   if(exists) return;
+
   const tr = document.createElement("tr");
   tr.innerHTML = `
     <td>${nama}</td>
     <td>${kelas}</td>
     <td>${pelajaran}</td>
     <td>${sekolah}</td>
-    <td 
-    <div id="qr-${id}">style="margin-bottom:5px;"></div>
+    <td>
+      <div id="qr-${id}" style="margin-bottom:5px;"></div>
       <button onclick="downloadQR('${id}','${nama}')" 
               class="btn-save" 
-              style="padding:4px 8px;font-size:12px;">Download</button></td>
+              style="padding:4px 8px;font-size:12px;">Download</button>
+    </td>
   `;
   tbody.prepend(tr);
-  new QRCode(document.getElementById(`qr-${id}`), { text: id, width:64, height:64 });
-}
+
+  // Generate QR
+  new QRCode(document.getElementById(`qr-${id}`), { 
+    text: id, width: 128, height: 128 
+  });
+    }
+  
   // Fungsi download QR + Nama
 function downloadQR(id, nama){
   const qrDiv = document.getElementById(`qr-${id}`);
