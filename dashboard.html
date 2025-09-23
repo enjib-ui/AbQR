@@ -53,6 +53,7 @@ th{background:#f2f2f2;}
 
 <!-- Content -->
 <div class="content" id="content">
+
   <!-- Tambah Siswa -->
   <div id="addStudentPage" class="page">
     <h1>Tambah Siswa</h1>
@@ -60,36 +61,29 @@ th{background:#f2f2f2;}
       <form id="addStudentForm">
         <div class="form-group"><label>Nama Siswa</label><input type="text" id="studentName" required></div>
         <div class="form-group"><label>Kelas</label><input type="text" id="studentClass" required></div>
-        <div class="form-group">
-  <label>Pelajaran</label>
-  <input type="text" id="studentSubject" required>
-</div>
-<div class="form-group">
-  <label>Nama Sekolah</label>
-  <input type="text" id="studentSchool" required>
-</div>
-
+        <div class="form-group"><label>Pelajaran</label><input type="text" id="studentSubject" required></div>
+        <div class="form-group"><label>Nama Sekolah</label><input type="text" id="studentSchool" required></div>
         <button type="submit" class="btn-save">Simpan</button>
       </form>
       <div style="margin-top:10px;">
         <input type="file" id="importFile" accept=".xlsx">
-        <button class="btn-save" onclick="importSiswa()">Import Excel</button>
+        <button type="button" class="btn-save" onclick="importSiswa()">Import Excel</button>
       </div>
     </div>
 
     <!-- Tabel Data Siswa -->
     <div class="card">
-      <button class="btn-save" onclick="exportSiswa()">Export Excel</button>
+      <button type="button" class="btn-save" onclick="exportSiswa()">Export Excel</button>
       <h3>Data Siswa</h3>
       <table>
         <thead>
-  <tr>
-    <th>Nama</th>
-    <th>Kelas</th>
-    <th>Pelajaran</th>
-    <th>Nama Sekolah</th>
-    <th>QR Code</th>
-  </tr>
+          <tr>
+            <th>Nama</th>
+            <th>Kelas</th>
+            <th>Pelajaran</th>
+            <th>Nama Sekolah</th>
+            <th>QR Code</th>
+          </tr>
         </thead>
         <tbody id="siswaTable"></tbody>
       </table>
@@ -134,6 +128,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/fireba
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDoc, getDocs, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBKFobPaqznvZdOMCXCh9D4d9jVEopq6DQ",
   authDomain: "abqr-7ec2a.firebaseapp.com",
@@ -169,32 +164,36 @@ function showPage(page){
 }
 window.showPage=showPage;
 
-// Tambah Siswa single
+// Tambah siswa manual
 document.addEventListener("DOMContentLoaded", () => {
   const addStudentForm = document.getElementById('addStudentForm');
   addStudentForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const name = document.getElementById("studentName").value.trim();
-const kelas = document.getElementById("studentClass").value.trim();
-const subject = document.getElementById("studentSubject").value.trim();
-const school = document.getElementById("studentSchool").value.trim();
+    try {
+      const name = document.getElementById("studentName").value.trim();
+      const kelas = document.getElementById("studentClass").value.trim();
+      const subject = document.getElementById("studentSubject").value.trim();
+      const school = document.getElementById("studentSchool").value.trim();
+      if(!name || !kelas || !subject || !school) return alert("Lengkapi semua field!");
 
-if(!name || !kelas || !subject || !school) return alert("Lengkapi semua field!");
+      const docRef = await addDoc(collection(db, "siswa"), {
+        nama: name,
+        kelas: kelas,
+        pelajaran: subject,
+        sekolah: school
+      });
 
-const docRef = await addDoc(collection(db, "siswa"), {
-  nama: name,
-  kelas: kelas,
-  pelajaran: subject,
-  sekolah: school
-});
-    
+      addSiswaRow(docRef.id, name, kelas, subject, school);
+      addStudentForm.reset();
+      showPopup("Siswa berhasil ditambahkan!");
+
     } catch (err) {
       alert("Gagal menambahkan siswa: " + err.message);
     }
   });
 });
 
-// Import Siswa Massal
+// Import Excel
 async function importSiswa(){
   const file=document.getElementById("importFile").files[0];
   if(!file){alert("Pilih file dulu");return;}
@@ -204,19 +203,19 @@ async function importSiswa(){
   const json=XLSX.utils.sheet_to_json(ws);
   for(let row of json){
     if(row.Nama && row.Kelas && row.Pelajaran && row.Sekolah){
-  const docRef = await addDoc(collection(db,"siswa"),{
-    nama: row.Nama,
-    kelas: row.Kelas,
-    pelajaran: row.Pelajaran,
-    sekolah: row.Sekolah
-  });
-  addSiswaRow(docRef.id, row.Nama, row.Kelas, row.Pelajaran, row.Sekolah);
+      const docRef = await addDoc(collection(db,"siswa"),{
+        nama: row.Nama,
+        kelas: row.Kelas,
+        pelajaran: row.Pelajaran,
+        sekolah: row.Sekolah
+      });
+      addSiswaRow(docRef.id, row.Nama, row.Kelas, row.Pelajaran, row.Sekolah);
     }
-    
-  alert("Import selesai");
+  }
+  showPopup("Import Excel selesai!");
 }
 
-// Tambahkan row siswa + QR
+// Tambah row + QR
 function addSiswaRow(id, nama, kelas, pelajaran, sekolah){
   const tbody = document.getElementById("siswaTable");
   const tr = document.createElement("tr");
@@ -230,7 +229,6 @@ function addSiswaRow(id, nama, kelas, pelajaran, sekolah){
   tbody.prepend(tr);
   new QRCode(document.getElementById(`qr-${id}`), { text: id, width:64, height:64 });
 }
-  
 
 // Scan QR
 function startScanner(){
@@ -240,7 +238,7 @@ function startScanner(){
     const docSnap=await getDoc(docRef);
     if(docSnap.exists()){
       const data=docSnap.data();
-      await addDoc(collection(db,"absensi"),{nama:data.nama,kelas:data.kelas,email:data.email,waktu:new Date()});
+      await addDoc(collection(db,"absensi"),{nama:data.nama,kelas:data.kelas,email:data.email||"",waktu:new Date()});
       showPopup("Berhasil Masuk");
       const li=document.createElement("li");
       li.textContent=`${data.nama} - ${data.kelas} - ${new Date().toLocaleTimeString()}`;
@@ -285,14 +283,13 @@ async function exportAbsensi(){
   XLSX.utils.book_append_sheet(wb,ws,"Absensi");
   XLSX.writeFile(wb,"DataAbsensi.xlsx");
 }
-window.exportAbsensi=exportAbsensi;
 
-  async function exportSiswa(){
+// Export Siswa
+async function exportSiswa(){
   const snap = await getDocs(collection(db,"siswa"));
   let dataArr = [];
   snap.forEach(docSnap=>{
     const d = docSnap.data();
-    // Sertakan QR Code unik (ID dokumen)
     dataArr.push({
       Nama: d.nama,
       Kelas: d.kelas,
@@ -301,15 +298,15 @@ window.exportAbsensi=exportAbsensi;
       QRCodeID: docSnap.id
     });
   });
-
-  // Buat sheet Excel
   const ws = XLSX.utils.json_to_sheet(dataArr);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Siswa");
   XLSX.writeFile(wb, "DataSiswa.xlsx");
 }
+
 window.exportSiswa = exportSiswa;
-                           
+window.exportAbsensi = exportAbsensi;
+
 </script>
 </body>
   </html>
