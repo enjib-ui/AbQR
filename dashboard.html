@@ -79,6 +79,7 @@ th{background:#f2f2f2;}
 
     <!-- Tabel Data Siswa -->
     <div class="card">
+      <button class="btn-save" onclick="exportSiswa()">Export Excel</button>
       <h3>Data Siswa</h3>
       <table>
         <thead>
@@ -285,6 +286,30 @@ async function exportAbsensi(){
   XLSX.writeFile(wb,"DataAbsensi.xlsx");
 }
 window.exportAbsensi=exportAbsensi;
+
+  async function exportSiswa(){
+  const snap = await getDocs(collection(db,"siswa"));
+  let dataArr = [];
+  snap.forEach(docSnap=>{
+    const d = docSnap.data();
+    // Sertakan QR Code unik (ID dokumen)
+    dataArr.push({
+      Nama: d.nama,
+      Kelas: d.kelas,
+      Pelajaran: d.pelajaran,
+      Sekolah: d.sekolah,
+      QRCodeID: docSnap.id
+    });
+  });
+
+  // Buat sheet Excel
+  const ws = XLSX.utils.json_to_sheet(dataArr);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Siswa");
+  XLSX.writeFile(wb, "DataSiswa.xlsx");
+}
+window.exportSiswa = exportSiswa;
+                           
 </script>
 </body>
   </html>
