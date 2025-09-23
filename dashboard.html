@@ -27,6 +27,9 @@
   #reader{width:100%;max-width:400px;margin:10px auto;}
   .popup{position:fixed;top:15px;right:15px;background:#4caf50;color:#fff;padding:10px 15px;border-radius:8px;display:none;z-index:999;}
   .absensi-list{margin-top:15px;max-height:250px;overflow-y:auto;}
+  table{width:100%;border-collapse:collapse;margin-top:15px;}
+  th,td{border:1px solid #ddd;padding:6px;text-align:center;font-size:13px;}
+  th{background:#f2f2f2;}
   @media screen and (max-width:768px){
     .sidebar{position:fixed;transform:translateX(-100%);}
     .sidebar.show{transform:translateX(0);}
@@ -65,7 +68,17 @@
         <button class="btn-save" onclick="importSiswa()">Import Excel</button>
       </div>
     </div>
-    <div id="qrcode" style="text-align:center;"></div>
+
+    <!-- Tabel Data Siswa -->
+    <div class="card">
+      <h3>Data Siswa</h3>
+      <table>
+        <thead>
+          <tr><th>Nama</th><th>Kelas</th><th>Email</th><th>QR Code</th></tr>
+        </thead>
+        <tbody id="siswaTable"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Scan QR -->
@@ -104,7 +117,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDoc, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDoc, getDocs, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBKFobPaqznvZdOMCXCh9D4d9jVEopq6DQ",
@@ -120,13 +133,13 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Login check
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth,user=>{
   if(user){document.getElementById("userEmail").innerText=user.email;}
   else window.location.href="index.html";
 });
 
 // Logout
-document.getElementById("logoutBtn").addEventListener("click", e=>{
+document.getElementById("logoutBtn").addEventListener("click",e=>{
   e.preventDefault(); signOut(auth).then(()=>window.location.href="index.html");
 });
 
@@ -141,19 +154,19 @@ function showPage(page){
 }
 window.showPage=showPage;
 
-// Add Student single
+// Tambah Siswa single
 document.getElementById('addStudentForm').addEventListener('submit', async e=>{
   e.preventDefault();
   const name=document.getElementById("studentName").value;
   const kelas=document.getElementById("studentClass").value;
   const email=document.getElementById("studentEmail").value;
-  const docRef=await addDoc(collection(db,"siswa"),{nama:name,kelas:kelas,email:email});
-  const uniqueId=docRef.id;
 
-  // QR Code
-  document.getElementById("qrcode").innerHTML="";
-  new QRCode(document.getElementById("qrcode"),{text:uniqueId,width:128,height:128});
-  e.target.reset();
+  const docRef=await addDoc(collection(db,"siswa"),{nama:name,kelas:kelas,email:email});
+  addSiswaRow(docRef.id,name,kelas,email);
+
+  document.getElementById("studentName").value="";
+  document.getElementById("studentClass").value="";
+  document.getElementById("studentEmail").value="";
 });
 
 // Import Siswa Massal
@@ -167,12 +180,19 @@ async function importSiswa(){
   for(let row of json){
     if(row.Nama && row.Kelas && row.Email){
       const docRef=await addDoc(collection(db,"siswa"),{nama:row.Nama,kelas:row.Kelas,email:row.Email});
-      // QR Code for last imported student
-      document.getElementById("qrcode").innerHTML="";
-      new QRCode(document.getElementById("qrcode"),{text:docRef.id,width:128,height:128});
+      addSiswaRow(docRef.id,row.Nama,row.Kelas,row.Email);
     }
   }
   alert("Import selesai");
+}
+
+// Tambahkan row siswa + QR
+function addSiswaRow(id,nama,kelas,email){
+  const tbody=document.getElementById("siswaTable");
+  const tr=document.createElement("tr");
+  tr.innerHTML=`<td>${nama}</td><td>${kelas}</td><td>${email}</td><td id="qr-${id}"></td>`;
+  tbody.prepend(tr);
+  new QRCode(document.getElementById(`qr-${id}`),{text:id,width:64,height:64});
 }
 
 // Scan QR
@@ -231,5 +251,4 @@ async function exportAbsensi(){
 window.exportAbsensi=exportAbsensi;
 </script>
 </body>
-  </html>
-  
+</html>
