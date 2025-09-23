@@ -1,320 +1,290 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Absensi</title>
-  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <style>
-    body{margin:0;font-family:"Poppins",sans-serif;display:flex;height:100vh;background:#f0f2ff;}
-    .sidebar{width:240px;background:#7494ec;color:#fff;display:flex;flex-direction:column;padding:20px 0;}
-    .sidebar h2{text-align:center;margin-bottom:10px;}
-    .sidebar p{font-size:13px;text-align:center;margin-bottom:30px;color:#e0e0ff;}
-    .sidebar a{color:#fff;padding:12px 20px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:.3s;}
-    .sidebar a:hover{background:rgba(255,255,255,0.2);}
-    .sidebar .logout{margin-top:auto;color:#f8d7da;}
-    .content{flex:1;padding:20px;overflow-y:auto;}
-    .content h1{color:#333;margin-bottom:20px;}
-    .card{background:#fff;padding:20px;margin-bottom:20px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
-    .form-group{margin-bottom:15px;}
-    .form-group label{display:block;margin-bottom:5px;font-weight:500;}
-    .form-group input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;}
-    .btn-save{background:#7494ec;color:#fff;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:600;margin-top:5px;}
-    .btn-save:hover{background:#5a78c7;}
-    #reader{width:100%;max-width:400px;margin:auto;}
-    .popup{position:fixed;top:20px;right:20px;background:#4caf50;color:#fff;padding:10px 20px;border-radius:8px;display:none;}
-    .absensi-list{margin-top:20px;}
-    table{width:100%;border-collapse:collapse;}
-    th,td{border:1px solid #ddd;padding:8px;text-align:left;}
-    th{background:#f2f2f2;}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Absensi</title>
+<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<style>
+  body, html {margin:0;padding:0;font-family:"Poppins",sans-serif;background:#f0f2ff;}
+  .sidebar {width:240px;background:#7494ec;color:#fff;flex-shrink:0;display:flex;flex-direction:column;padding:20px 0;position:fixed;height:100vh;transition: transform 0.3s;}
+  .sidebar h2{text-align:center;margin-bottom:10px;font-size:20px;}
+  .sidebar p{font-size:13px;text-align:center;margin-bottom:30px;color:#e0e0ff;}
+  .sidebar a{color:#fff;padding:12px 20px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:.3s;}
+  .sidebar a:hover{background:rgba(255,255,255,0.2);}
+  .sidebar .logout{margin-top:auto;color:#f8d7da;}
+  .content {margin-left:240px;padding:15px;transition: margin-left 0.3s;}
+  .content h1{color:#333;margin-bottom:15px;font-size:18px;}
+  .card{background:#fff;padding:15px;margin-bottom:15px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
+  .form-group{margin-bottom:12px;}
+  .form-group label{display:block;margin-bottom:5px;font-weight:500;}
+  .form-group input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:14px;}
+  .btn-save{background:#7494ec;color:#fff;padding:10px 15px;border:none;border-radius:8px;cursor:pointer;font-weight:600;margin-top:5px;font-size:14px;}
+  .btn-save:hover{background:#5a78c7;}
+  #reader{width:100%;max-width:400px;margin:10px auto;}
+  .popup{position:fixed;top:15px;right:15px;background:#4caf50;color:#fff;padding:10px 15px;border-radius:8px;display:none;z-index:999;}
+  .absensi-list{margin-top:15px;max-height:250px;overflow-y:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{border:1px solid #ddd;padding:6px;text-align:left;vertical-align:middle;}
+  th{background:#f2f2f2;font-weight:600;}
+  .qrcode-cell{width:60px;text-align:center;}
+  @media screen and (max-width:768px){
+    .sidebar{position:fixed;transform:translateX(-100%);}
+    .sidebar.show{transform:translateX(0);}
+    .content{margin-left:0;}
+    .menu-toggle{position:fixed;top:10px;left:10px;font-size:24px;cursor:pointer;color:#7494ec;z-index:999;}
+  }
+</style>
 </head>
 <body>
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>Dashboard</h2>
-    <p>Logged in as <br><span id="userEmail"></span></p>
-    <a href="#" onclick="showPage('addStudent')"><i class='bx bxs-user-plus'></i>Tambah Siswa</a>
-    <a href="#" onclick="showPage('scanQr')"><i class='bx bx-qr-scan'></i>Scan QR</a>
-    <a href="#" onclick="showPage('absensiData')"><i class='bx bxs-report'></i>Data Absensi</a>
-    <a href="#" onclick="showPage('manageStudent')"><i class='bx bxs-data'></i>Data Siswa</a>
-    <a href="#" id="logoutBtn" class="logout"><i class='bx bx-log-out'></i>Logout</a>
+<div class="menu-toggle" onclick="toggleMenu()">&#9776;</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <h2>Dashboard</h2>
+  <p>Logged in as <br><span id="userEmail"></span></p>
+  <a href="#" onclick="showPage('addStudent')"><i class='bx bxs-user-plus'></i>Tambah Siswa</a>
+  <a href="#" onclick="showPage('scanQr')"><i class='bx bx-qr-scan'></i>Scan QR</a>
+  <a href="#" onclick="showPage('absensiData')"><i class='bx bxs-report'></i>Data Absensi</a>
+  <a href="#" onclick="showPage('manageStudent')"><i class='bx bxs-data'></i>Data Siswa</a>
+  <a href="#" id="logoutBtn" class="logout"><i class='bx bx-log-out'></i>Logout</a>
+</div>
+
+<!-- Content -->
+<div class="content" id="content">
+  <!-- Tambah Siswa -->
+  <div id="addStudentPage" class="page">
+    <h1>Tambah Siswa</h1>
+    <div class="card">
+      <form id="addStudentForm">
+        <div class="form-group"><label>Nama Siswa</label><input type="text" id="studentName" required></div>
+        <div class="form-group"><label>Kelas</label><input type="text" id="studentClass" required></div>
+        <div class="form-group"><label>Email</label><input type="email" id="studentEmail" required></div>
+        <button type="submit" class="btn-save">Simpan</button>
+      </form>
+    </div>
+    <div id="qrcode" style="text-align:center;"></div>
   </div>
 
-  <!-- Content -->
-  <div class="content">
-    <!-- Tambah Siswa -->
-    <div id="addStudentPage" class="page">
-      <h1>Tambah Siswa</h1>
-      <div class="card">
-        <form id="addStudentForm">
-          <div class="form-group">
-            <label>Nama Siswa</label>
-            <input type="text" id="studentName" required>
-          </div>
-          <div class="form-group">
-            <label>Kelas</label>
-            <input type="text" id="studentClass" required>
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="studentEmail" required>
-          </div>
-          <button type="submit" class="btn-save">Simpan</button>
-        </form>
-      </div>
-      <div id="qrcode"></div>
-    </div>
-
-    <!-- Scan QR -->
-    <div id="scanQrPage" class="page" style="display:none;">
-      <h1>Scan QR</h1>
-      <div class="card">
-        <div id="reader"></div>
-        <div class="absensi-list">
-          <h3>Data Absensi Real-time</h3>
-          <ul id="scanResult"></ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- Data Absensi -->
-    <div id="absensiDataPage" class="page" style="display:none;">
-      <h1>Data Absensi</h1>
-      <div class="card">
-        <label for="filterDate">Filter Tanggal:</label>
-        <input type="date" id="filterDate">
-        <button class="btn-save" onclick="loadAbsensi()">Filter</button>
-        <button class="btn-save" onclick="exportAbsensi()">Export Excel</button>
-      </div>
-      <div class="card">
-        <table>
-          <thead>
-            <tr>
-              <th>Nama</th>
-              <th>Kelas</th>
-              <th>Email</th>
-              <th>Waktu</th>
-            </tr>
-          </thead>
-          <tbody id="absensiTable"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Data Siswa -->
-    <div id="manageStudentPage" class="page" style="display:none;">
-      <h1>Data Siswa</h1>
-      <div class="card">
-        <button class="btn-save" onclick="exportSiswa()">Export Excel</button>
-        <input type="file" id="importFile" accept=".xlsx" style="margin-top:10px;">
-        <button class="btn-save" onclick="importSiswa()">Import Excel</button>
-      </div>
-      <div class="card">
-        <table>
-          <thead>
-            <tr>
-              <th>Nama</th>
-              <th>Kelas</th>
-              <th>Email</th>
-            </tr>
-          </thead>
-          <tbody id="siswaTable"></tbody>
-        </table>
+  <!-- Scan QR -->
+  <div id="scanQrPage" class="page" style="display:none;">
+    <h1>Scan QR</h1>
+    <div class="card">
+      <div id="reader"></div>
+      <div class="absensi-list">
+        <h3>Data Absensi Real-time</h3>
+        <ul id="scanResult"></ul>
       </div>
     </div>
   </div>
 
-  <div id="popup" class="popup">Berhasil Masuk</div>
+  <!-- Data Absensi -->
+  <div id="absensiDataPage" class="page" style="display:none;">
+    <h1>Data Absensi</h1>
+    <div class="card">
+      <label for="filterDate">Filter Tanggal:</label>
+      <input type="date" id="filterDate">
+      <button class="btn-save" onclick="loadAbsensi()">Filter</button>
+      <button class="btn-save" onclick="exportAbsensi()">Export Excel</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Nama</th><th>Kelas</th><th>Email</th><th>Waktu</th></tr></thead>
+        <tbody id="absensiTable"></tbody>
+      </table>
+    </div>
+  </div>
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDoc, getDocs, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  <!-- Data Siswa -->
+  <div id="manageStudentPage" class="page" style="display:none;">
+    <h1>Data Siswa</h1>
+    <div class="card">
+      <button class="btn-save" onclick="exportSiswa()">Export Excel</button>
+      <input type="file" id="importFile" accept=".xlsx" style="margin-top:10px;">
+      <button class="btn-save" onclick="importSiswa()">Import Excel</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>QR</th><th>Nama</th><th>Kelas</th><th>Email</th></tr></thead>
+        <tbody id="siswaTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBKFobPaqznvZdOMCXCh9D4d9jVEopq6DQ",
-      authDomain: "abqr-7ec2a.firebaseapp.com",
-      projectId: "abqr-7ec2a",
-      storageBucket: "abqr-7ec2a.firebasestorage.app",
-      messagingSenderId: "908334703141",
-      appId: "1:908334703141:web:3dad64af321d59f55395cc"
-    };
+<div id="popup" class="popup">Berhasil Masuk</div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDoc, getDocs, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // Cek login
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById("userEmail").innerText = user.email;
-        loadSiswa();
-      } else {
-        window.location.href = "index.html";
-      }
-    });
+const firebaseConfig = {
+  apiKey: "AIzaSyBKFobPaqznvZdOMCXCh9D4d9jVEopq6DQ",
+  authDomain: "abqr-7ec2a.firebaseapp.com",
+  projectId: "abqr-7ec2a",
+  storageBucket: "abqr-7ec2a.firebasestorage.app",
+  messagingSenderId: "908334703141",
+  appId: "1:908334703141:web:3dad64af321d59f55395cc"
+};
 
-    // Logout
-    document.getElementById("logoutBtn").addEventListener("click", (e) => {
-      e.preventDefault();
-      signOut(auth).then(() => {
-        window.location.href = "index.html";
-      });
-    });
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    // Switch page
-    function showPage(page){
-      document.querySelectorAll(".page").forEach(p=>p.style.display="none");
-      document.getElementById(page+"Page").style.display="block";
-      if(page==="manageStudent") loadSiswa();
+// Login check
+onAuthStateChanged(auth, (user) => {
+  if(user){document.getElementById("userEmail").innerText=user.email;loadSiswa();}
+  else window.location.href="index.html";
+});
+
+// Logout
+document.getElementById("logoutBtn").addEventListener("click", e=>{
+  e.preventDefault(); signOut(auth).then(()=>window.location.href="index.html");
+});
+
+// Toggle mobile menu
+function toggleMenu(){document.getElementById("sidebar").classList.toggle("show");}
+
+// Switch page
+function showPage(page){
+  document.querySelectorAll(".page").forEach(p=>p.style.display="none");
+  document.getElementById(page+"Page").style.display="block";
+  if(page==="manageStudent") loadSiswa();
+  if(page==="scanQr") startScanner();
+}
+window.showPage=showPage;
+
+// Add Student
+document.getElementById('addStudentForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const name=document.getElementById("studentName").value;
+  const kelas=document.getElementById("studentClass").value;
+  const email=document.getElementById("studentEmail").value;
+
+  const docRef=await addDoc(collection(db,"siswa"),{nama:name,kelas:kelas,email:email});
+  const uniqueId = docRef.id;
+
+  // Show QR Code
+  document.getElementById("qrcode").innerHTML="";
+  new QRCode(document.getElementById("qrcode"),{text:uniqueId,width:128,height:128});
+
+  e.target.reset();
+  addSiswaToTable({id:uniqueId,nama:name,kelas:kelas,email:email});
+});
+
+// Add single student row to table
+function addSiswaToTable(student){
+  const tbody=document.getElementById("siswaTable");
+  const tr=document.createElement("tr");
+  tr.innerHTML=`<td class="qrcode-cell" id="qrcode-${student.id}"></td><td>${student.nama}</td><td>${student.kelas}</td><td>${student.email}</td>`;
+  tbody.appendChild(tr);
+  new QRCode(document.getElementById(`qrcode-${student.id}`),{text:student.id,width:50,height:50});
+}
+
+// Scan QR
+function startScanner(){
+  const html5QrCode = new Html5Qrcode("reader");
+  html5QrCode.start({facingMode:"environment"},{fps:10,qrbox:250},async (decodedText)=>{
+    const docRef=doc(db,"siswa",decodedText);
+    const docSnap=await getDoc(docRef);
+    if(docSnap.exists()){
+      const data=docSnap.data();
+      await addDoc(collection(db,"absensi"),{nama:data.nama,kelas:data.kelas,email:data.email,waktu:new Date()});
+      showPopup("Berhasil Masuk");
+      const li=document.createElement("li");
+      li.textContent=`${data.nama} - ${data.kelas} - ${new Date().toLocaleTimeString()}`;
+      document.getElementById("scanResult").prepend(li);
     }
-    window.showPage = showPage;
+  },()=>{});
+}
 
-    // Tambah Siswa
-    const addStudentForm = document.getElementById('addStudentForm');
-    addStudentForm.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const name = document.getElementById("studentName").value;
-      const kelas = document.getElementById("studentClass").value;
-      const email = document.getElementById("studentEmail").value;
+// Popup
+function showPopup(msg){const popup=document.getElementById("popup");popup.textContent=msg;popup.style.display="block";setTimeout(()=>popup.style.display="none",2000);}
 
-      const docRef = await addDoc(collection(db,"siswa"),{
-        nama:name,kelas:kelas,email:email
-      });
-      const uniqueId = docRef.id;
-
-      document.getElementById("qrcode").innerHTML = "";
-      new QRCode(document.getElementById("qrcode"),{
-        text: uniqueId,
-        width:128,
-        height:128
-      });
-
-      addStudentForm.reset();
-      loadSiswa();
-    });
-
-    // Scan QR
-    function startScanner(){
-      const html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start({facingMode:"environment"},{fps:10,qrbox:250},
-        async (decodedText)=>{
-          const docRef = doc(db,"siswa",decodedText);
-          const docSnap = await getDoc(docRef);
-          if(docSnap.exists()){
-            const data = docSnap.data();
-            await addDoc(collection(db,"absensi"),{
-              nama:data.nama,
-              kelas:data.kelas,
-              email:data.email,
-              waktu:new Date()
-            });
-            showPopup("Berhasil Masuk");
-            const li=document.createElement("li");
-            li.textContent=`${data.nama} - ${data.kelas} - ${new Date().toLocaleTimeString()}`;
-            document.getElementById("scanResult").prepend(li);
-          }
-        },()=>{}
-      );
+// Load Absensi
+async function loadAbsensi(){
+  const date=document.getElementById("filterDate").value;
+  const tbody=document.getElementById("absensiTable");
+  tbody.innerHTML="";
+  const q=query(collection(db,"absensi"),orderBy("waktu","desc"));
+  const snap=await getDocs(q);
+  snap.forEach(docSnap=>{
+    const data=docSnap.data();
+    const waktu=new Date(data.waktu.seconds*1000).toLocaleString();
+    if(!date || waktu.startsWith(new Date(date).toLocaleDateString())){
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td>${data.nama}</td><td>${data.kelas}</td><td>${data.email}</td><td>${waktu}</td>`;
+      tbody.appendChild(tr);
     }
-    startScanner();
+  });
+}
+window.loadAbsensi=loadAbsensi;
 
-    // Popup
-    function showPopup(msg){
-      const popup=document.getElementById("popup");
-      popup.textContent=msg;
-      popup.style.display="block";
-      setTimeout(()=>popup.style.display="none",2000);
-    }
+// Export Absensi
+async function exportAbsensi(){
+  const q=query(collection(db,"absensi"),orderBy("waktu","desc"));
+  const snap=await getDocs(q);
+  const dataArr=[];
+  snap.forEach(docSnap=>{
+    const d=docSnap.data();
+    dataArr.push({Nama:d.nama,Kelas:d.kelas,Email:d.email,Waktu:new Date(d.waktu.seconds*1000).toLocaleString()});
+  });
+  const ws=XLSX.utils.json_to_sheet(dataArr);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Absensi");
+  XLSX.writeFile(wb,"DataAbsensi.xlsx");
+}
+window.exportAbsensi=exportAbsensi;
 
-    // Load Absensi
-    async function loadAbsensi(){
-      const date=document.getElementById("filterDate").value;
-      const tbody=document.getElementById("absensiTable");
-      tbody.innerHTML="";
-      let q=query(collection(db,"absensi"),orderBy("waktu","desc"));
-      const snap=await getDocs(q);
-      snap.forEach(docSnap=>{
-        const data=docSnap.data();
-        const waktu=new Date(data.waktu.seconds*1000).toLocaleString();
-        if(!date || waktu.startsWith(new Date(date).toLocaleDateString())){
-          const tr=document.createElement("tr");
-          tr.innerHTML=`<td>${data.nama}</td><td>${data.kelas}</td><td>${data.email}</td><td>${waktu}</td>`;
-          tbody.appendChild(tr);
-        }
-      });
-    }
-    window.loadAbsensi = loadAbsensi;
+// Load Siswa
+async function loadSiswa(){
+  const tbody=document.getElementById("siswaTable");
+  if(!tbody) return;
+  tbody.innerHTML="";
+  const snap=await getDocs(collection(db,"siswa"));
+  snap.forEach(docSnap=>{
+    const d=docSnap.data();
+    addSiswaToTable({id:docSnap.id,nama:d.nama,kelas:d.kelas,email:d.email});
+  });
+}
 
-    // Export Absensi
-    async function exportAbsensi(){
-      let q=query(collection(db,"absensi"),orderBy("waktu","desc"));
-      const snap=await getDocs(q);
-      let dataArr=[];
-      snap.forEach(docSnap=>{
-        const d=docSnap.data();
-        dataArr.push({Nama:d.nama,Kelas:d.kelas,Email:d.email,Waktu:new Date(d.waktu.seconds*1000).toLocaleString()});
-      });
-      const ws=XLSX.utils.json_to_sheet(dataArr);
-      const wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,ws,"Absensi");
-      XLSX.writeFile(wb,"DataAbsensi.xlsx");
-    }
-    window.exportAbsensi=exportAbsensi;
+// Export Siswa
+async function exportSiswa(){
+  const snap=await getDocs(collection(db,"siswa"));
+  const dataArr=[];
+  snap.forEach(docSnap=>{
+    const d=docSnap.data();
+    dataArr.push({Nama:d.nama,Kelas:d.kelas,Email:d.email});
+  });
+  const ws=XLSX.utils.json_to_sheet(dataArr);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Siswa");
+  XLSX.writeFile(wb,"DataSiswa.xlsx");
+}
+window.exportSiswa=exportSiswa;
 
-    // Load Data Siswa
-    async function loadSiswa(){
-      const tbody=document.getElementById("siswaTable");
-      if(!tbody) return;
-      tbody.innerHTML="";
-      const snap=await getDocs(collection(db,"siswa"));
-      snap.forEach(docSnap=>{
-        const data=docSnap.data();
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${data.nama}</td><td>${data.kelas}</td><td>${data.email}</td>`;
-        tbody.appendChild(tr);
-      });
+// Import Siswa Massal
+async function importSiswa(){
+  const file=document.getElementById("importFile").files[0];
+  if(!file){alert("Pilih file dulu");return;}
+  const data=await file.arrayBuffer();
+  const wb=XLSX.read(data);
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const json=XLSX.utils.sheet_to_json(ws);
+  for(let row of json){
+    if(row.Nama && row.Kelas && row.Email){
+      const docRef=await addDoc(collection(db,"siswa"),{nama:row.Nama,kelas:row.Kelas,email:row.Email});
+      addSiswaToTable({id:docRef.id,nama:row.Nama,kelas:row.Kelas,email:row.Email});
     }
-
-    // Export Siswa
-    async function exportSiswa(){
-      const snap=await getDocs(collection(db,"siswa"));
-      let dataArr=[];
-      snap.forEach(docSnap=>{
-        const d=docSnap.data();
-        dataArr.push({Nama:d.nama,Kelas:d.kelas,Email:d.email});
-      });
-      const ws=XLSX.utils.json_to_sheet(dataArr);
-      const wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,ws,"Siswa");
-      XLSX.writeFile(wb,"DataSiswa.xlsx");
-    }
-    window.exportSiswa=exportSiswa;
-
-    // Import Siswa
-    async function importSiswa(){
-      const file=document.getElementById("importFile").files[0];
-      if(!file){alert("Pilih file dulu");return;}
-      const data=await file.arrayBuffer();
-      const wb=XLSX.read(data);
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      const json=XLSX.utils.sheet_to_json(ws);
-      for(let row of json){
-        if(row.Nama && row.Kelas && row.Email){
-          await addDoc(collection(db,"siswa"),{
-            nama:row.Nama,kelas:row.Kelas,email:row.Email
-          });
-        }
-      }
-      alert("Import selesai");
-      loadSiswa();
-    }
-    window.importSiswa=importSiswa;
-  </script>
+  }
+  alert("Import selesai");
+}
+window.importSiswa=importSiswa;
+</script>
 </body>
 </html>
