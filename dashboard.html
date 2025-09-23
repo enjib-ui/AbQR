@@ -176,9 +176,21 @@ async function loadSiswa(){
     addSiswaRow(docSnap.id, d.nama, d.kelas, d.pelajaran, d.sekolah);
   });
 }
-
+// Fungsi load semua siswa untuk ditampilkan di tabel
+async function loadSiswa() {
+  const tbody = document.getElementById("siswaTable");
+  tbody.innerHTML = ""; // Kosongkan dulu tabel
+  const snap = await getDocs(collection(db, "siswa"));
+  snap.forEach(docSnap => {
+    const d = docSnap.data();
+    addSiswaRow(docSnap.id, d.nama, d.kelas, d.pelajaran, d.sekolah);
+  });
+}
+window.loadSiswa = loadSiswa; // Supaya bisa dipanggil dari luar
+  
 // Tambah siswa manual
 document.addEventListener("DOMContentLoaded", () => {
+  loadSiswa();
   const addStudentForm = document.getElementById('addStudentForm');
   addStudentForm.addEventListener('submit', async e => {
     e.preventDefault();
