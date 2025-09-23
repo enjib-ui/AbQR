@@ -9,33 +9,33 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <style>
-  body, html {margin:0;padding:0;font-family:"Poppins",sans-serif;background:#f0f2ff;}
-  .sidebar {width:240px;background:#7494ec;color:#fff;flex-shrink:0;display:flex;flex-direction:column;padding:20px 0;position:fixed;height:100vh;transition: transform 0.3s;}
-  .sidebar h2{text-align:center;margin-bottom:10px;font-size:20px;}
-  .sidebar p{font-size:13px;text-align:center;margin-bottom:30px;color:#e0e0ff;}
-  .sidebar a{color:#fff;padding:12px 20px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:.3s;}
-  .sidebar a:hover{background:rgba(255,255,255,0.2);}
-  .sidebar .logout{margin-top:auto;color:#f8d7da;}
-  .content {margin-left:240px;padding:15px;transition: margin-left 0.3s;}
-  .content h1{color:#333;margin-bottom:15px;font-size:18px;}
-  .card{background:#fff;padding:15px;margin-bottom:15px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
-  .form-group{margin-bottom:12px;}
-  .form-group label{display:block;margin-bottom:5px;font-weight:500;}
-  .form-group input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:14px;}
-  .btn-save{background:#7494ec;color:#fff;padding:10px 15px;border:none;border-radius:8px;cursor:pointer;font-weight:600;margin-top:5px;font-size:14px;}
-  .btn-save:hover{background:#5a78c7;}
-  #reader{width:100%;max-width:400px;margin:10px auto;}
-  .popup{position:fixed;top:15px;right:15px;background:#4caf50;color:#fff;padding:10px 15px;border-radius:8px;display:none;z-index:999;}
-  .absensi-list{margin-top:15px;max-height:250px;overflow-y:auto;}
-  table{width:100%;border-collapse:collapse;margin-top:15px;}
-  th,td{border:1px solid #ddd;padding:6px;text-align:center;font-size:13px;}
-  th{background:#f2f2f2;}
-  @media screen and (max-width:768px){
-    .sidebar{position:fixed;transform:translateX(-100%);}
-    .sidebar.show{transform:translateX(0);}
-    .content{margin-left:0;}
-    .menu-toggle{position:fixed;top:10px;left:10px;font-size:24px;cursor:pointer;color:#7494ec;z-index:999;}
-  }
+body, html {margin:0;padding:0;font-family:"Poppins",sans-serif;background:#f0f2ff;}
+.sidebar {width:240px;background:#7494ec;color:#fff;flex-shrink:0;display:flex;flex-direction:column;padding:20px 0;position:fixed;height:100vh;transition: transform 0.3s;}
+.sidebar h2{text-align:center;margin-bottom:10px;font-size:20px;}
+.sidebar p{font-size:13px;text-align:center;margin-bottom:30px;color:#e0e0ff;}
+.sidebar a{color:#fff;padding:12px 20px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:.3s;}
+.sidebar a:hover{background:rgba(255,255,255,0.2);}
+.sidebar .logout{margin-top:auto;color:#f8d7da;}
+.content {margin-left:240px;padding:15px;transition: margin-left 0.3s;}
+.content h1{color:#333;margin-bottom:15px;font-size:18px;}
+.card{background:#fff;padding:15px;margin-bottom:15px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
+.form-group{margin-bottom:12px;}
+.form-group label{display:block;margin-bottom:5px;font-weight:500;}
+.form-group input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:14px;}
+.btn-save{background:#7494ec;color:#fff;padding:10px 15px;border:none;border-radius:8px;cursor:pointer;font-weight:600;margin-top:5px;font-size:14px;}
+.btn-save:hover{background:#5a78c7;}
+#reader{width:100%;max-width:400px;margin:10px auto;}
+.popup{position:fixed;top:15px;right:15px;background:#4caf50;color:#fff;padding:10px 15px;border-radius:8px;display:none;z-index:999;}
+.absensi-list{margin-top:15px;max-height:250px;overflow-y:auto;}
+table{width:100%;border-collapse:collapse;margin-top:15px;}
+th,td{border:1px solid #ddd;padding:6px;text-align:center;font-size:13px;}
+th{background:#f2f2f2;}
+@media screen and (max-width:768px){
+  .sidebar{position:fixed;transform:translateX(-100%);}
+  .sidebar.show{transform:translateX(0);}
+  .content{margin-left:0;}
+  .menu-toggle{position:fixed;top:10px;left:10px;font-size:24px;cursor:pointer;color:#7494ec;z-index:999;}
+}
 </style>
 </head>
 <body>
@@ -155,18 +155,26 @@ function showPage(page){
 window.showPage=showPage;
 
 // Tambah Siswa single
-document.getElementById('addStudentForm').addEventListener('submit', async e=>{
-  e.preventDefault();
-  const name=document.getElementById("studentName").value;
-  const kelas=document.getElementById("studentClass").value;
-  const email=document.getElementById("studentEmail").value;
+document.addEventListener("DOMContentLoaded", () => {
+  const addStudentForm = document.getElementById('addStudentForm');
+  addStudentForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = document.getElementById("studentName").value.trim();
+    const kelas = document.getElementById("studentClass").value.trim();
+    const email = document.getElementById("studentEmail").value.trim();
 
-  const docRef=await addDoc(collection(db,"siswa"),{nama:name,kelas:kelas,email:email});
-  addSiswaRow(docRef.id,name,kelas,email);
+    if (!name || !kelas || !email) return alert("Lengkapi semua field!");
 
-  document.getElementById("studentName").value="";
-  document.getElementById("studentClass").value="";
-  document.getElementById("studentEmail").value="";
+    try {
+      const docRef = await addDoc(collection(db, "siswa"), { nama: name, kelas: kelas, email: email });
+      addSiswaRow(docRef.id, name, kelas, email);
+      document.getElementById("studentName").value = "";
+      document.getElementById("studentClass").value = "";
+      document.getElementById("studentEmail").value = "";
+    } catch (err) {
+      alert("Gagal menambahkan siswa: " + err.message);
+    }
+  });
 });
 
 // Import Siswa Massal
@@ -251,4 +259,5 @@ async function exportAbsensi(){
 window.exportAbsensi=exportAbsensi;
 </script>
 </body>
-</html>
+  </html>
+  
