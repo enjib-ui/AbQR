@@ -158,11 +158,24 @@ function toggleMenu(){document.getElementById("sidebar").classList.toggle("show"
 
 // Switch page
 function showPage(page){
-  document.querySelectorAll(".page").forEach(p=>p.style.display="none");
-  document.getElementById(page+"Page").style.display="block";
-  if(page==="scanQr") startScanner();
+  document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+  document.getElementById(page + "Page").style.display = "block";
+
+  if(page === "scanQr") startScanner();
+  if(page === "addStudent") loadSiswa(); // load data siswa dari Firestore
 }
 window.showPage=showPage;
+
+// Load siswa dari Firestore
+async function loadSiswa(){
+  const tbody = document.getElementById("siswaTable");
+  tbody.innerHTML = "";
+  const snap = await getDocs(collection(db, "siswa"));
+  snap.forEach(docSnap => {
+    const d = docSnap.data();
+    addSiswaRow(docSnap.id, d.nama, d.kelas, d.pelajaran, d.sekolah);
+  });
+}
 
 // Tambah siswa manual
 document.addEventListener("DOMContentLoaded", () => {
@@ -309,5 +322,4 @@ window.exportAbsensi = exportAbsensi;
 
 </script>
 </body>
-  </html>
-  
+</html>
