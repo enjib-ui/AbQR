@@ -82,7 +82,13 @@ th{background:#f2f2f2;}
       <h3>Data Siswa</h3>
       <table>
         <thead>
-          <tr><th>Nama</th><th>Kelas</th><th>Email</th><th>QR Code</th></tr>
+  <tr>
+    <th>Nama</th>
+    <th>Kelas</th>
+    <th>Pelajaran</th>
+    <th>Nama Sekolah</th>
+    <th>QR Code</th>
+  </tr>
         </thead>
         <tbody id="siswaTable"></tbody>
       </table>
@@ -168,17 +174,19 @@ document.addEventListener("DOMContentLoaded", () => {
   addStudentForm.addEventListener('submit', async e => {
     e.preventDefault();
     const name = document.getElementById("studentName").value.trim();
-    const kelas = document.getElementById("studentClass").value.trim();
-    const email = document.getElementById("studentEmail").value.trim();
+const kelas = document.getElementById("studentClass").value.trim();
+const subject = document.getElementById("studentSubject").value.trim();
+const school = document.getElementById("studentSchool").value.trim();
 
-    if (!name || !kelas || !email) return alert("Lengkapi semua field!");
+if(!name || !kelas || !subject || !school) return alert("Lengkapi semua field!");
 
-    try {
-      const docRef = await addDoc(collection(db, "siswa"), { nama: name, kelas: kelas, email: email });
-      addSiswaRow(docRef.id, name, kelas, email);
-      document.getElementById("studentName").value = "";
-      document.getElementById("studentClass").value = "";
-      document.getElementById("studentEmail").value = "";
+const docRef = await addDoc(collection(db, "siswa"), {
+  nama: name,
+  kelas: kelas,
+  pelajaran: subject,
+  sekolah: school
+});
+    
     } catch (err) {
       alert("Gagal menambahkan siswa: " + err.message);
     }
@@ -194,22 +202,34 @@ async function importSiswa(){
   const ws=wb.Sheets[wb.SheetNames[0]];
   const json=XLSX.utils.sheet_to_json(ws);
   for(let row of json){
-    if(row.Nama && row.Kelas && row.Email){
-      const docRef=await addDoc(collection(db,"siswa"),{nama:row.Nama,kelas:row.Kelas,email:row.Email});
-      addSiswaRow(docRef.id,row.Nama,row.Kelas,row.Email);
+    if(row.Nama && row.Kelas && row.Pelajaran && row.Sekolah){
+  const docRef = await addDoc(collection(db,"siswa"),{
+    nama: row.Nama,
+    kelas: row.Kelas,
+    pelajaran: row.Pelajaran,
+    sekolah: row.Sekolah
+  });
+  addSiswaRow(docRef.id, row.Nama, row.Kelas, row.Pelajaran, row.Sekolah);
     }
-  }
+    
   alert("Import selesai");
 }
 
 // Tambahkan row siswa + QR
-function addSiswaRow(id,nama,kelas,email){
-  const tbody=document.getElementById("siswaTable");
-  const tr=document.createElement("tr");
-  tr.innerHTML=`<td>${nama}</td><td>${kelas}</td><td>${email}</td><td id="qr-${id}"></td>`;
+function addSiswaRow(id, nama, kelas, pelajaran, sekolah){
+  const tbody = document.getElementById("siswaTable");
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${nama}</td>
+    <td>${kelas}</td>
+    <td>${pelajaran}</td>
+    <td>${sekolah}</td>
+    <td id="qr-${id}"></td>
+  `;
   tbody.prepend(tr);
-  new QRCode(document.getElementById(`qr-${id}`),{text:id,width:64,height:64});
+  new QRCode(document.getElementById(`qr-${id}`), { text: id, width:64, height:64 });
 }
+  
 
 // Scan QR
 function startScanner(){
