@@ -35,6 +35,20 @@ th{background:#f2f2f2;}
   .sidebar.show{transform:translateX(0);}
   .content{margin-left:0;}
   .menu-toggle{position:fixed;top:10px;left:10px;font-size:24px;cursor:pointer;color:#7494ec;z-index:999;}
+  .sidebar.show {
+    transform: translateX(0); /* muncul saat toggle */
+  }
+  .content { margin-left:0; }
+  .menu-toggle {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #7494ec;
+    z-index: 1000; /* pastikan di atas sidebar */
+  }
+    
 }
 </style>
 </head>
@@ -161,6 +175,15 @@ document.getElementById("logoutBtn").addEventListener("click", e=>{
 
 // Toggle mobile menu
 function toggleMenu(){document.getElementById("sidebar").classList.toggle("show");}
+
+document.querySelectorAll('.sidebar a').forEach(link => {
+  link.addEventListener('click', () => {
+    if(window.innerWidth <= 768){
+      document.getElementById('sidebar').classList.remove('show');
+    }
+  });
+});
+  
 
 // Switch page
 function showPage(page){
