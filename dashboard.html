@@ -32,6 +32,15 @@ th,td{border:1px solid #ddd;padding:6px;text-align:center;font-size:13px;}
 th{background:#f2f2f2;}
 @media screen and (max-width:768px){
   .sidebar{position:fixed;transform:translateX(-100%);z-index:2000;}
+  .close-btn {
+  font-size: 24px;
+  color: #fff;
+  text-align: right;
+  padding: 0 15px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  }
+  
   .sidebar.show{transform:translateX(0);}
   .content{margin-left:0;}
   .menu-toggle{position:fixed;top:10px;left:10px;font-size:24px;cursor:pointer;color:#7494ec;z-index:999;}
@@ -57,6 +66,7 @@ th{background:#f2f2f2;}
 
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
+  <div class="close-btn" onclick="closeSidebar()">&#10005;</div> <!-- X -->
   <h2>Dashboard</h2>
   <p>Logged in as <br><span id="userEmail"></span></p>
   <a href="#" onclick="showPage('addStudent')"><i class='bx bxs-user-plus'></i>Tambah Siswa</a>
@@ -184,6 +194,10 @@ document.querySelectorAll('.sidebar a').forEach(link => {
     }
 });
 });
+  function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('show');
+  }
+  
   
 
 // Switch page
