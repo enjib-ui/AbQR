@@ -176,6 +176,7 @@ document.getElementById("logoutBtn").addEventListener("click", e=>{
 // Toggle mobile menu
 function toggleMenu(){document.getElementById("sidebar").classList.toggle("show");}
 
+window.toggleMenu = toggleMenu;
 document.querySelectorAll('.sidebar a').forEach(link => {
   link.addEventListener('click', () => {
     if(window.innerWidth <= 768){
