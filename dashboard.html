@@ -34,11 +34,13 @@ th{background:#f2f2f2;}
   .sidebar{position:fixed;transform:translateX(-100%);z-index:2000;}
   .close-btn {
   font-size: 24px;
+  position: absolute;
   color: #fff;
   text-align: right;
   padding: 0 15px;
   cursor: pointer;
   margin-bottom: 15px;
+  z-index: 2100;
   }
   
   .sidebar.show{transform:translateX(0);}
@@ -66,7 +68,7 @@ th{background:#f2f2f2;}
 
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
-  <div class="close-btn" onclick="closeSidebar()">&#10005;</div> <!-- X -->
+   class="close-btn" onclick="closeSidebar()">&#10005; <!-- X -->
   <h2>Dashboard</h2>
   <p>Logged in as <br><span id="userEmail"></span></p>
   <a href="#" onclick="showPage('addStudent')"><i class='bx bxs-user-plus'></i>Tambah Siswa</a>
