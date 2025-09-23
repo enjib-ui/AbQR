@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Absensi</title>
+  <title>Dashboard</title>
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body{margin:0;font-family:"Poppins",sans-serif;display:flex;height:100vh;background:#f0f2ff;}
     .sidebar{width:240px;background:#7494ec;color:#fff;display:flex;flex-direction:column;padding:20px 0;}
@@ -18,18 +16,18 @@
     .sidebar .logout{margin-top:auto;color:#f8d7da;}
     .content{flex:1;padding:20px;overflow-y:auto;}
     .content h1{color:#333;margin-bottom:20px;}
-    .card{background:#fff;padding:20px;margin-bottom:20px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
+    .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);margin-bottom:20px;}
     .form-group{margin-bottom:15px;}
     .form-group label{display:block;margin-bottom:5px;font-weight:500;}
     .form-group input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;}
-    .btn-save{background:#7494ec;color:#fff;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:600;margin-top:5px;}
-    .btn-save:hover{background:#5a78c7;}
-    #reader{width:100%;max-width:400px;margin:auto;}
-    .popup{position:fixed;top:20px;right:20px;background:#4caf50;color:#fff;padding:10px 20px;border-radius:8px;display:none;}
-    .absensi-list{margin-top:20px;}
-    table{width:100%;border-collapse:collapse;}
-    th,td{border:1px solid #ddd;padding:8px;text-align:left;}
-    th{background:#f2f2f2;}
+    .btn{background:#7494ec;color:#fff;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:600;}
+    .btn:hover{background:#5a78c7;}
+    #qrPreview{margin-top:15px;text-align:center;}
+    #scanPreview{width:100%;max-width:400px;margin:0 auto;}
+    .popup{position:fixed;top:20px;right:20px;background:#4caf50;color:#fff;padding:12px 20px;border-radius:8px;display:none;}
+    table{width:100%;border-collapse:collapse;margin-top:15px;}
+    th,td{padding:8px;border:1px solid #ddd;text-align:left;}
+    th{background:#f5f5f5;}
   </style>
 </head>
 <body>
@@ -37,110 +35,58 @@
   <div class="sidebar">
     <h2>Dashboard</h2>
     <p>Logged in as <br><span id="userEmail"></span></p>
-    <a href="#" onclick="showPage('addStudent')"><i class='bx bxs-user-plus'></i>Tambah Siswa</a>
-    <a href="#" onclick="showPage('scanQr')"><i class='bx bx-qr-scan'></i>Scan QR</a>
-    <a href="#" onclick="showPage('absensiData')"><i class='bx bxs-report'></i>Data Absensi</a>
-    <a href="#" onclick="showPage('manageStudent')"><i class='bx bxs-data'></i>Data Siswa</a>
+    <a href="#" data-page="add"><i class='bx bxs-user-plus'></i>Tambah Siswa</a>
+    <a href="#" data-page="list"><i class='bx bxs-group'></i>Daftar Siswa</a>
+    <a href="#" data-page="scan"><i class='bx bx-qr-scan'></i>Scan QR</a>
+    <a href="#" data-page="absensi"><i class='bx bx-spreadsheet'></i>Data Absensi</a>
     <a href="#" id="logoutBtn" class="logout"><i class='bx bx-log-out'></i>Logout</a>
   </div>
 
   <!-- Content -->
-  <div class="content">
-    <!-- Tambah Siswa -->
-    <div id="addStudentPage" class="page">
-      <h1>Tambah Siswa</h1>
-      <div class="card">
-        <form id="addStudentForm">
-          <div class="form-group">
-            <label>Nama Siswa</label>
-            <input type="text" id="studentName" required>
-          </div>
-          <div class="form-group">
-            <label>Kelas</label>
-            <input type="text" id="studentClass" required>
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="studentEmail" required>
-          </div>
-          <button type="submit" class="btn-save">Simpan</button>
-        </form>
-      </div>
-      <div id="qrcode"></div>
-    </div>
-
-    <!-- Scan QR -->
-    <div id="scanQrPage" class="page" style="display:none;">
-      <h1>Scan QR</h1>
-      <div class="card">
-        <div id="reader"></div>
-        <div class="absensi-list">
-          <h3>Data Absensi Real-time</h3>
-          <ul id="scanResult"></ul>
+  <div class="content" id="content">
+    <h1>Tambah Siswa</h1>
+    <div class="card">
+      <form id="addStudentForm">
+        <div class="form-group">
+          <label>Nama Siswa</label>
+          <input type="text" id="studentName" required>
         </div>
-      </div>
+        <div class="form-group">
+          <label>Kelas</label>
+          <input type="text" id="studentClass" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="studentEmail" required>
+        </div>
+        <button type="submit" class="btn">Simpan</button>
+      </form>
+      <div id="qrPreview"></div>
     </div>
 
-    <!-- Data Absensi -->
-    <div id="absensiDataPage" class="page" style="display:none;">
-      <h1>Data Absensi</h1>
-      <div class="card">
-        <label for="filterDate">Filter Tanggal:</label>
-        <input type="date" id="filterDate">
-        <button class="btn-save" onclick="loadAbsensi()">Filter</button>
-        <button class="btn-save" onclick="exportAbsensi()">Export Excel</button>
-      </div>
-      <div class="card">
-        <table>
-          <thead>
-            <tr>
-              <th>Nama</th>
-              <th>Kelas</th>
-              <th>Email</th>
-              <th>Waktu</th>
-            </tr>
-          </thead>
-          <tbody id="absensiTable"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Data Siswa -->
-    <div id="manageStudentPage" class="page" style="display:none;">
-      <h1>Data Siswa</h1>
-      <div class="card">
-        <button class="btn-save" onclick="exportSiswa()">Export Excel</button>
-        <input type="file" id="importFile" accept=".xlsx" style="margin-top:10px;">
-        <button class="btn-save" onclick="importSiswa()">Import Excel</button>
-      </div>
-      <div class="card">
-        <table>
-          <thead>
-            <tr>
-              <th>Nama</th>
-              <th>Kelas</th>
-              <th>Email</th>
-            </tr>
-          </thead>
-          <tbody id="siswaTable"></tbody>
-        </table>
-      </div>
+    <div class="card">
+      <h3>Import / Export Excel</h3>
+      <input type="file" id="importFile" accept=".xlsx,.xls">
+      <button class="btn" id="exportBtn">Export Data Siswa</button>
     </div>
   </div>
 
-  <div id="popup" class="popup">Berhasil Masuk</div>
+  <div class="popup" id="popupMsg">Berhasil Masuk</div>
 
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDoc, getDocs, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, setDoc, doc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import QRCode from "https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.esm.js";
+    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js";
 
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBKFobPaqznvZdOMCXCh9D4d9jVEopq6DQ",
       authDomain: "abqr-7ec2a.firebaseapp.com",
       projectId: "abqr-7ec2a",
-      storageBucket: "abqr-7ec2a.firebasestorage.app",
+      storageBucket: "abqr-7ec2a.appspot.com",
       messagingSenderId: "908334703141",
       appId: "1:908334703141:web:3dad64af321d59f55395cc"
     };
@@ -149,17 +95,16 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Cek login
+    // ✅ Cek login
     onAuthStateChanged(auth, (user) => {
       if (user) {
         document.getElementById("userEmail").innerText = user.email;
-        loadSiswa();
       } else {
         window.location.href = "index.html";
       }
     });
 
-    // Logout
+    // ✅ Logout
     document.getElementById("logoutBtn").addEventListener("click", (e) => {
       e.preventDefault();
       signOut(auth).then(() => {
@@ -167,154 +112,125 @@
       });
     });
 
-    // Switch page
-    function showPage(page){
-      document.querySelectorAll(".page").forEach(p=>p.style.display="none");
-      document.getElementById(page+"Page").style.display="block";
-      if(page==="manageStudent") loadSiswa();
-    }
-    window.showPage = showPage;
-
-    // Tambah Siswa
-    const addStudentForm = document.getElementById('addStudentForm');
-    addStudentForm.addEventListener('submit', async (e)=>{
+    // ✅ Tambah siswa manual
+    const addStudentForm = document.getElementById("addStudentForm");
+    addStudentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("studentName").value;
       const kelas = document.getElementById("studentClass").value;
       const email = document.getElementById("studentEmail").value;
 
-      const docRef = await addDoc(collection(db,"siswa"),{
-        nama:name,kelas:kelas,email:email
-      });
-      const uniqueId = docRef.id;
+      const newDoc = doc(collection(db, "students"));
+      const qrData = newDoc.id;
+      await setDoc(newDoc, { name, kelas, email, qrData, createdAt: serverTimestamp() });
 
-      document.getElementById("qrcode").innerHTML = "";
-      new QRCode(document.getElementById("qrcode"),{
-        text: uniqueId,
-        width:128,
-        height:128
-      });
+      const qrCanvas = document.createElement("canvas");
+      await QRCode.toCanvas(qrCanvas, qrData);
+      document.getElementById("qrPreview").innerHTML = "<h4>QR Code:</h4>";
+      document.getElementById("qrPreview").appendChild(qrCanvas);
 
       addStudentForm.reset();
-      loadSiswa();
     });
 
-    // Scan QR
-    function startScanner(){
-      const html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start({facingMode:"environment"},{fps:10,qrbox:250},
-        async (decodedText)=>{
-          const docRef = doc(db,"siswa",decodedText);
-          const docSnap = await getDoc(docRef);
-          if(docSnap.exists()){
-            const data = docSnap.data();
-            await addDoc(collection(db,"absensi"),{
-              nama:data.nama,
-              kelas:data.kelas,
-              email:data.email,
-              waktu:new Date()
-            });
-            showPopup("Berhasil Masuk");
-            const li=document.createElement("li");
-            li.textContent=`${data.nama} - ${data.kelas} - ${new Date().toLocaleTimeString()}`;
-            document.getElementById("scanResult").prepend(li);
-          }
-        },()=>{}
-      );
-    }
-    startScanner();
-
-    // Popup
-    function showPopup(msg){
-      const popup=document.getElementById("popup");
-      popup.textContent=msg;
-      popup.style.display="block";
-      setTimeout(()=>popup.style.display="none",2000);
-    }
-
-    // Load Absensi
-    async function loadAbsensi(){
-      const date=document.getElementById("filterDate").value;
-      const tbody=document.getElementById("absensiTable");
-      tbody.innerHTML="";
-      let q=query(collection(db,"absensi"),orderBy("waktu","desc"));
-      const snap=await getDocs(q);
-      snap.forEach(docSnap=>{
-        const data=docSnap.data();
-        const waktu=new Date(data.waktu.seconds*1000).toLocaleString();
-        if(!date || waktu.startsWith(new Date(date).toLocaleDateString())){
-          const tr=document.createElement("tr");
-          tr.innerHTML=`<td>${data.nama}</td><td>${data.kelas}</td><td>${data.email}</td><td>${waktu}</td>`;
-          tbody.appendChild(tr);
+    // ✅ Import Excel
+    document.getElementById("importFile").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet);
+      for (let row of rows) {
+        if (row.Nama && row.Kelas && row.Email) {
+          const newDoc = doc(collection(db, "students"));
+          const qrData = newDoc.id;
+          await setDoc(newDoc, { name: row.Nama, kelas: row.Kelas, email: row.Email, qrData, createdAt: serverTimestamp() });
         }
-      });
-    }
-    window.loadAbsensi = loadAbsensi;
+      }
+      alert("Import selesai, siswa berhasil ditambahkan.");
+    });
 
-    // Export Absensi
-    async function exportAbsensi(){
-      let q=query(collection(db,"absensi"),orderBy("waktu","desc"));
-      const snap=await getDocs(q);
-      let dataArr=[];
-      snap.forEach(docSnap=>{
-        const d=docSnap.data();
-        dataArr.push({Nama:d.nama,Kelas:d.kelas,Email:d.email,Waktu:new Date(d.waktu.seconds*1000).toLocaleString()});
+    // ✅ Export Excel
+    document.getElementById("exportBtn").addEventListener("click", async () => {
+      const snapshot = await getDocs(collection(db, "students"));
+      const data = [];
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        data.push({ Nama: d.name, Kelas: d.kelas, Email: d.email, QR: d.qrData });
       });
-      const ws=XLSX.utils.json_to_sheet(dataArr);
-      const wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,ws,"Absensi");
-      XLSX.writeFile(wb,"DataAbsensi.xlsx");
-    }
-    window.exportAbsensi=exportAbsensi;
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Siswa");
+      XLSX.writeFile(wb, "data_siswa.xlsx");
+    });
 
-    // Load Data Siswa
-    async function loadSiswa(){
-      const tbody=document.getElementById("siswaTable");
-      if(!tbody) return;
-      tbody.innerHTML="";
-      const snap=await getDocs(collection(db,"siswa"));
-      snap.forEach(docSnap=>{
-        const data=docSnap.data();
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${data.nama}</td><td>${data.kelas}</td><td>${data.email}</td>`;
+    // ✅ Navigasi sidebar
+    const content = document.getElementById("content");
+    document.querySelectorAll(".sidebar a[data-page]").forEach(link => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const page = link.dataset.page;
+        if (page === "scan") loadScanPage();
+        if (page === "list") loadListPage();
+        if (page === "absensi") loadAbsensiPage();
+        if (page === "add") loadAddPage();
+      });
+    });
+
+    function loadAddPage() {
+      location.reload(); // reload biar form awal tampil
+    }
+
+    async function loadListPage() {
+      content.innerHTML = "<h1>Daftar Siswa</h1><div class='card'><table><thead><tr><th>Nama</th><th>Kelas</th><th>Email</th><th>QR</th></tr></thead><tbody id='studentList'></tbody></table></div>";
+      const snapshot = await getDocs(collection(db, "students"));
+      const tbody = document.getElementById("studentList");
+      snapshot.forEach(docSnap => {
+        const d = docSnap.data();
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${d.name}</td><td>${d.kelas}</td><td>${d.email}</td><td>${d.qrData}</td>`;
         tbody.appendChild(tr);
       });
     }
 
-    // Export Siswa
-    async function exportSiswa(){
-      const snap=await getDocs(collection(db,"siswa"));
-      let dataArr=[];
-      snap.forEach(docSnap=>{
-        const d=docSnap.data();
-        dataArr.push({Nama:d.nama,Kelas:d.kelas,Email:d.email});
-      });
-      const ws=XLSX.utils.json_to_sheet(dataArr);
-      const wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,ws,"Siswa");
-      XLSX.writeFile(wb,"DataSiswa.xlsx");
-    }
-    window.exportSiswa=exportSiswa;
-
-    // Import Siswa
-    async function importSiswa(){
-      const file=document.getElementById("importFile").files[0];
-      if(!file){alert("Pilih file dulu");return;}
-      const data=await file.arrayBuffer();
-      const wb=XLSX.read(data);
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      const json=XLSX.utils.sheet_to_json(ws);
-      for(let row of json){
-        if(row.Nama && row.Kelas && row.Email){
-          await addDoc(collection(db,"siswa"),{
-            nama:row.Nama,kelas:row.Kelas,email:row.Email
+    async function loadScanPage() {
+      content.innerHTML = "<h1>Scan QR</h1><div class='card'><video id='scanPreview'></video><div id='scanResult'></div></div>";
+      const video = document.getElementById("scanPreview");
+      const qrScanner = new QrScanner(video, async result => {
+        const q = query(collection(db, "students"), where("qrData", "==", result.data));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          snap.forEach(async docSnap => {
+            const d = docSnap.data();
+            document.getElementById("scanResult").innerHTML += `<p>${d.name} - ${d.kelas} (${d.email})</p>`;
+            // simpan absensi
+            await addDoc(collection(db, "absensi"), { studentId: docSnap.id, name: d.name, kelas: d.kelas, email: d.email, waktu: serverTimestamp() });
           });
+          showPopup("Berhasil Masuk");
         }
-      }
-      alert("Import selesai");
-      loadSiswa();
+      });
+      qrScanner.start();
     }
-    window.importSiswa=importSiswa;
+
+    async function loadAbsensiPage() {
+      content.innerHTML = "<h1>Data Absensi</h1><div class='card'><table><thead><tr><th>Nama</th><th>Kelas</th><th>Email</th><th>Waktu</th></tr></thead><tbody id='absensiList'></tbody></table></div>";
+      const snapshot = await getDocs(collection(db, "absensi"));
+      const tbody = document.getElementById("absensiList");
+      snapshot.forEach(docSnap => {
+        const d = docSnap.data();
+        const waktu = d.waktu ? new Date(d.waktu.seconds * 1000).toLocaleString() : "-";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${d.name}</td><td>${d.kelas}</td><td>${d.email}</td><td>${waktu}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function showPopup(msg) {
+      const popup = document.getElementById("popupMsg");
+      popup.innerText = msg;
+      popup.style.display = "block";
+      setTimeout(() => popup.style.display = "none", 2000);
+    }
   </script>
 </body>
 </html>
