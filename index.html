@@ -75,12 +75,13 @@
   /* Toggle jadi vertikal */
   .toggle-box::before {
     left: 0;
-    top: -250%;
+    top: -65%;
     width: 100%;
-    height: 300%;
-    border-radius: 50%;
+    height: 100%;
+    border-radius: 0%;
   }
-  .container.active .toggle-box::before { top: 50%; }
+  .container.active .toggle-box::before { top: 65%;
+    left: 0;}
 
   .toggle-panel {
     width: 100%;
@@ -145,13 +146,13 @@
     <!-- TOGGLE -->
     <div class="toggle-box">
       <div class="toggle-panel toggle-left">
-        <h1>Hello, Welcome!</h1>
-        <p>Don't have an account?</p>
+        <h1>Halo, Selamat Datang!</h1>
+        <p>Belum Punya Akun?</p>
         <button class="btn register-btn" type="button">Register</button>
       </div>
       <div class="toggle-panel toggle-right">
-        <h1>Welcome Back!</h1>
-        <p>Already have an account?</p>
+        <h1>Selamat Datang Kembali!</h1>
+        <p>Sudah Punya Akun?</p>
         <button class="btn login-btn" type="button">Login</button>
       </div>
     </div>
@@ -235,4 +236,4 @@ getRedirectResult(auth)
   
 </script>
 </body>
-  </html>
+</html>
