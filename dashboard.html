@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Absensi</title>
+<title>Dashboard Absensi Multitenancy</title>
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -71,7 +71,6 @@ th{background:#f2f2f2;}
       </div>
     </div>
 
-    <!-- Tabel Data Siswa -->
     <div class="card">
       <button type="button" class="btn-save" onclick="exportSiswa()">Export Excel</button>
       <h3>Data Siswa</h3>
@@ -122,11 +121,11 @@ th{background:#f2f2f2;}
 
 <div id="popup" class="popup">Berhasil Masuk</div>
 
-<!-- Firebase -->
+<!-- Firebase + JS -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDoc, getDocs, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -142,14 +141,21 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+let tenantId = null;
+
 // Login check
-onAuthStateChanged(auth,user=>{
-  if(user){document.getElementById("userEmail").innerText=user.email;}
-  else window.location.href="index.html";
+onAuthStateChanged(auth, user => {
+  if(user){
+    tenantId = user.uid; // tenant = user login
+    document.getElementById("userEmail").innerText = user.email;
+    loadSiswa(); // load siswa saat login
+  } else {
+    window.location.href = "index.html";
+  }
 });
 
 // Logout
-document.getElementById("logoutBtn").addEventListener("click",e=>{
+document.getElementById("logoutBtn").addEventListener("click", e=>{
   e.preventDefault(); signOut(auth).then(()=>window.location.href="index.html");
 });
 
@@ -160,79 +166,67 @@ function toggleMenu(){document.getElementById("sidebar").classList.toggle("show"
 function showPage(page){
   document.querySelectorAll(".page").forEach(p => p.style.display = "none");
   document.getElementById(page + "Page").style.display = "block";
-
   if(page === "scanQr") startScanner();
-  if(page === "addStudent") loadSiswa(); // load data siswa dari Firestore
+  if(page === "addStudent") loadSiswa();
 }
-window.showPage=showPage;
+window.showPage = showPage;
 
-// Load siswa dari Firestore
+// Load siswa multitenancy
 async function loadSiswa(){
+  if(!tenantId) return;
   const tbody = document.getElementById("siswaTable");
   tbody.innerHTML = "";
-  const snap = await getDocs(collection(db, "siswa"));
+  const snap = await getDocs(collection(db, `tenants/${tenantId}/siswa`));
   snap.forEach(docSnap => {
     const d = docSnap.data();
     addSiswaRow(docSnap.id, d.nama, d.kelas, d.pelajaran, d.sekolah);
   });
 }
-// Fungsi load semua siswa untuk ditampilkan di tabel
-async function loadSiswa() {
-  const tbody = document.getElementById("siswaTable");
-  tbody.innerHTML = ""; // Kosongkan dulu tabel
-  const snap = await getDocs(collection(db, "siswa"));
-  snap.forEach(docSnap => {
-    const d = docSnap.data();
-    addSiswaRow(docSnap.id, d.nama, d.kelas, d.pelajaran, d.sekolah);
-  });
-}
-window.loadSiswa = loadSiswa; // Supaya bisa dipanggil dari luar
-  
+window.loadSiswa = loadSiswa;
+
 // Tambah siswa manual
 document.addEventListener("DOMContentLoaded", () => {
-  loadSiswa();
   const addStudentForm = document.getElementById('addStudentForm');
   addStudentForm.addEventListener('submit', async e => {
     e.preventDefault();
-    try {
-      const name = document.getElementById("studentName").value.trim();
-      const kelas = document.getElementById("studentClass").value.trim();
-      const subject = document.getElementById("studentSubject").value.trim();
-      const school = document.getElementById("studentSchool").value.trim();
-      if(!name || !kelas || !subject || !school) return alert("Lengkapi semua field!");
+    if(!tenantId) return;
+    const name = document.getElementById("studentName").value.trim();
+    const kelas = document.getElementById("studentClass").value.trim();
+    const subject = document.getElementById("studentSubject").value.trim();
+    const school = document.getElementById("studentSchool").value.trim();
+    if(!name || !kelas || !subject || !school) return alert("Lengkapi semua field!");
 
-      const docRef = await addDoc(collection(db, "siswa"), {
-        nama: name,
-        kelas: kelas,
-        pelajaran: subject,
-        sekolah: school
-      });
+    // Cek duplikat berdasarkan nama+kelas
+    const snap = await getDocs(collection(db, `tenants/${tenantId}/siswa`));
+    const exists = snap.docs.some(d => d.data().nama===name && d.data().kelas===kelas);
+    if(exists) return showPopup("Siswa sudah ada!");
 
-      addSiswaRow(docRef.id, name, kelas, subject, school);
-      addStudentForm.reset();
-      showPopup("Siswa berhasil ditambahkan!");
+    const docRef = await addDoc(collection(db, `tenants/${tenantId}/siswa`), {
+      nama: name, kelas: kelas, pelajaran: subject, sekolah: school
+    });
 
-    } catch (err) {
-      alert("Gagal menambahkan siswa: " + err.message);
-    }
+    addSiswaRow(docRef.id, name, kelas, subject, school);
+    addStudentForm.reset();
+    showPopup("Siswa berhasil ditambahkan!");
   });
 });
 
 // Import Excel
 async function importSiswa(){
-  const file=document.getElementById("importFile").files[0];
+  if(!tenantId) return;
+  const file = document.getElementById("importFile").files[0];
   if(!file){alert("Pilih file dulu");return;}
-  const data=await file.arrayBuffer();
-  const wb=XLSX.read(data);
-  const ws=wb.Sheets[wb.SheetNames[0]];
-  const json=XLSX.utils.sheet_to_json(ws);
+  const data = await file.arrayBuffer();
+  const wb = XLSX.read(data);
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const json = XLSX.utils.sheet_to_json(ws);
   for(let row of json){
     if(row.Nama && row.Kelas && row.Pelajaran && row.Sekolah){
-      const docRef = await addDoc(collection(db,"siswa"),{
-        nama: row.Nama,
-        kelas: row.Kelas,
-        pelajaran: row.Pelajaran,
-        sekolah: row.Sekolah
+      const snap = await getDocs(collection(db, `tenants/${tenantId}/siswa`));
+      const exists = snap.docs.some(d => d.data().nama===row.Nama && d.data().kelas===row.Kelas);
+      if(exists) continue;
+      const docRef = await addDoc(collection(db, `tenants/${tenantId}/siswa`), {
+        nama: row.Nama, kelas: row.Kelas, pelajaran: row.Pelajaran, sekolah: row.Sekolah
       });
       addSiswaRow(docRef.id, row.Nama, row.Kelas, row.Pelajaran, row.Sekolah);
     }
@@ -240,9 +234,12 @@ async function importSiswa(){
   showPopup("Import Excel selesai!");
 }
 
-// Tambah row + QR
+// Tambah row + QR (cek duplikat di tabel)
 function addSiswaRow(id, nama, kelas, pelajaran, sekolah){
   const tbody = document.getElementById("siswaTable");
+  // Cek apakah sudah ada di tabel
+  const exists = Array.from(tbody.children).some(tr => tr.children[0].innerText===nama && tr.children[1].innerText===kelas);
+  if(exists) return;
   const tr = document.createElement("tr");
   tr.innerHTML = `
     <td>${nama}</td>
@@ -257,71 +254,75 @@ function addSiswaRow(id, nama, kelas, pelajaran, sekolah){
 
 // Scan QR
 function startScanner(){
-  const html5QrCode=new Html5Qrcode("reader");
-  html5QrCode.start({facingMode:"environment"},{fps:10,qrbox:250},async decodedText=>{
-    const docRef=doc(db,"siswa",decodedText);
-    const docSnap=await getDoc(docRef);
+  if(!tenantId) return;
+  const html5QrCode = new Html5Qrcode("reader");
+  html5QrCode.start({facingMode:"environment"}, {fps:10, qrbox:250}, async decodedText=>{
+    const docRef = doc(db, `tenants/${tenantId}/siswa`, decodedText);
+    const docSnap = await getDoc(docRef);
     if(docSnap.exists()){
-      const data=docSnap.data();
-      await addDoc(collection(db,"absensi"),{nama:data.nama,kelas:data.kelas,email:data.email||"",waktu:new Date()});
+      const data = docSnap.data();
+      await addDoc(collection(db, `tenants/${tenantId}/absensi`), {
+        nama: data.nama, kelas: data.kelas, email: data.email||"", waktu: new Date()
+      });
       showPopup("Berhasil Masuk");
-      const li=document.createElement("li");
-      li.textContent=`${data.nama} - ${data.kelas} - ${new Date().toLocaleTimeString()}`;
+      const li = document.createElement("li");
+      li.textContent = `${data.nama} - ${data.kelas} - ${new Date().toLocaleTimeString()}`;
       document.getElementById("scanResult").prepend(li);
     }
-  },()=>{});
+  }, ()=>{});
 }
 
 // Popup
-function showPopup(msg){const popup=document.getElementById("popup");popup.textContent=msg;popup.style.display="block";setTimeout(()=>popup.style.display="none",2000);}
+function showPopup(msg){
+  const popup = document.getElementById("popup");
+  popup.textContent = msg;
+  popup.style.display = "block";
+  setTimeout(()=>popup.style.display="none", 2000);
+}
 
 // Load Absensi
 async function loadAbsensi(){
-  const date=document.getElementById("filterDate").value;
-  const tbody=document.getElementById("absensiTable");
-  tbody.innerHTML="";
-  const q=query(collection(db,"absensi"),orderBy("waktu","desc"));
-  const snap=await getDocs(q);
+  if(!tenantId) return;
+  const date = document.getElementById("filterDate").value;
+  const tbody = document.getElementById("absensiTable");
+  tbody.innerHTML = "";
+  const q = query(collection(db, `tenants/${tenantId}/absensi`), orderBy("waktu","desc"));
+  const snap = await getDocs(q);
   snap.forEach(docSnap=>{
-    const data=docSnap.data();
-    const waktu=new Date(data.waktu.seconds*1000).toLocaleString();
+    const data = docSnap.data();
+    const waktu = new Date(data.waktu.seconds*1000).toLocaleString();
     if(!date || waktu.startsWith(new Date(date).toLocaleDateString())){
-      const tr=document.createElement("tr");
+      const tr = document.createElement("tr");
       tr.innerHTML=`<td>${data.nama}</td><td>${data.kelas}</td><td>${data.email}</td><td>${waktu}</td>`;
       tbody.appendChild(tr);
     }
   });
 }
-window.loadAbsensi=loadAbsensi;
+window.loadAbsensi = loadAbsensi;
 
 // Export Absensi
 async function exportAbsensi(){
-  const q=query(collection(db,"absensi"),orderBy("waktu","desc"));
-  const snap=await getDocs(q);
+  if(!tenantId) return;
+  const snap = await getDocs(collection(db, `tenants/${tenantId}/absensi`));
   const dataArr=[];
   snap.forEach(docSnap=>{
-    const d=docSnap.data();
+    const d = docSnap.data();
     dataArr.push({Nama:d.nama,Kelas:d.kelas,Email:d.email,Waktu:new Date(d.waktu.seconds*1000).toLocaleString()});
   });
-  const ws=XLSX.utils.json_to_sheet(dataArr);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Absensi");
-  XLSX.writeFile(wb,"DataAbsensi.xlsx");
+  const ws = XLSX.utils.json_to_sheet(dataArr);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Absensi");
+  XLSX.writeFile(wb, "DataAbsensi.xlsx");
 }
 
 // Export Siswa
 async function exportSiswa(){
-  const snap = await getDocs(collection(db,"siswa"));
-  let dataArr = [];
+  if(!tenantId) return;
+  const snap = await getDocs(collection(db, `tenants/${tenantId}/siswa`));
+  const dataArr = [];
   snap.forEach(docSnap=>{
     const d = docSnap.data();
-    dataArr.push({
-      Nama: d.nama,
-      Kelas: d.kelas,
-      Pelajaran: d.pelajaran,
-      Sekolah: d.sekolah,
-      QRCodeID: docSnap.id
-    });
+    dataArr.push({Nama:d.nama,Kelas:d.kelas,Pelajaran:d.pelajaran,Sekolah:d.sekolah,QRCodeID:docSnap.id});
   });
   const ws = XLSX.utils.json_to_sheet(dataArr);
   const wb = XLSX.utils.book_new();
@@ -334,4 +335,5 @@ window.exportAbsensi = exportAbsensi;
 
 </script>
 </body>
-</html>
+                                               </html>
+                                               
