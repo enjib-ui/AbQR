@@ -306,7 +306,7 @@ function addSiswaRow(id, nama, kelas, pelajaran, sekolah){
   });
     }
   
-  // Fungsi download QR + Nama
+// Fungsi download QR + Nama siswa
 function downloadQR(id, nama){
   const qrDiv = document.getElementById(`qr-${id}`);
   const img = qrDiv.querySelector("img") || qrDiv.querySelector("canvas");
@@ -316,29 +316,30 @@ function downloadQR(id, nama){
   const canvas = document.createElement("canvas");
   const size = 160;
   canvas.width = size;
-  canvas.height = size + 30; // space untuk nama
+  canvas.height = size + 40; // ruang untuk nama
   const ctx = canvas.getContext("2d");
 
-  // Isi putih background
+  // Background putih
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Gambar QR ke canvas
+  // Gambar QR
   ctx.drawImage(img, 16, 0, 128, 128);
 
-  // Tulis nama di bawah
+  // Tulis nama di bawah QR
   ctx.fillStyle = "#000";
   ctx.font = "14px Poppins, sans-serif";
   ctx.textAlign = "center";
   ctx.fillText(nama, canvas.width/2, size + 20);
 
-  // Download JPG
+  // Download sebagai JPG
   const link = document.createElement("a");
   link.download = `${nama}_QR.jpg`;
   link.href = canvas.toDataURL("image/jpeg");
   link.click();
 }
 
+// expose ke global agar bisa dipanggil onclick
 window.downloadQR = downloadQR;
   
 
