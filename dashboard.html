@@ -288,11 +288,50 @@ function addSiswaRow(id, nama, kelas, pelajaran, sekolah){
     <td>${kelas}</td>
     <td>${pelajaran}</td>
     <td>${sekolah}</td>
-    <td id="qr-${id}"></td>
+    <td 
+    <div id="qr-${id}">style="margin-bottom:5px;"></div>
+      <button onclick="downloadQR('${id}','${nama}')" 
+              class="btn-save" 
+              style="padding:4px 8px;font-size:12px;">Download</button></td>
   `;
   tbody.prepend(tr);
   new QRCode(document.getElementById(`qr-${id}`), { text: id, width:64, height:64 });
 }
+  // Fungsi download QR + Nama
+function downloadQR(id, nama){
+  const qrDiv = document.getElementById(`qr-${id}`);
+  const img = qrDiv.querySelector("img") || qrDiv.querySelector("canvas");
+  if(!img) return alert("QR belum tersedia");
+
+  // Buat canvas baru untuk gabungkan QR + Nama
+  const canvas = document.createElement("canvas");
+  const size = 160;
+  canvas.width = size;
+  canvas.height = size + 30; // space untuk nama
+  const ctx = canvas.getContext("2d");
+
+  // Isi putih background
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Gambar QR ke canvas
+  ctx.drawImage(img, 16, 0, 128, 128);
+
+  // Tulis nama di bawah
+  ctx.fillStyle = "#000";
+  ctx.font = "14px Poppins, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(nama, canvas.width/2, size + 20);
+
+  // Download JPG
+  const link = document.createElement("a");
+  link.download = `${nama}_QR.jpg`;
+  link.href = canvas.toDataURL("image/jpeg");
+  link.click();
+}
+
+window.downloadQR = downloadQR;
+  
 
 // Scan QR
 function startScanner(){
