@@ -182,7 +182,13 @@ document.querySelectorAll('.sidebar a').forEach(link => {
     if(window.innerWidth <= 768){
       document.getElementById('sidebar').classList.remove('show');
     }
-  });
+    // Tutup sidebar saat klik di luar (area konten)
+document.getElementById('content').addEventListener('click', () => {
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar.classList.contains('show')) {
+    sidebar.classList.remove('show');
+  }
+});
 });
   
 
