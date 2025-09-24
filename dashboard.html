@@ -451,11 +451,11 @@ async function exportAbsensi(){
   const dataArr=[];
   snap.forEach(docSnap=>{
     const d = docSnap.data();
-    dataArr.push({Nama:d.nama,Kelas:d.kelas,Pelajaran:d.pelajaran,
+    dataArr.push({Nama:d.nama,Kelas:d.kelas,Pelajaran:d.pelajaran,});
 let waktu;
 if (data.waktu?.seconds) {
   waktu = new Date(data.waktu.seconds * 1000).toLocaleString();
-} else {
+ else {
   waktu = new Date(data.waktu).toLocaleString()});
   });
   const ws = XLSX.utils.json_to_sheet(dataArr);
