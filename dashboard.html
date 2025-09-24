@@ -399,24 +399,25 @@ function startScanner(){
     if(docSnap.exists()){
       const data = docSnap.data();
 
-      const today = new Date().toLocaleDateString(); // format tanggal
-      const absensiSnap = await getDocs(collection(db, `tenants/${tenantId}/absensi`));
+      // ==== CEK SUDAH ABSEN HARI INI UNTUK PELAJARAN INI ====
+const awalHari = new Date(); awalHari.setHours(0,0,0,0);
+const akhirHari = new Date(); akhirHari.setHours(23,59,59,999);
 
-      const sudahAda = absensiSnap.docs.some(d=>{
-        const a = d.data();
-        if(!a.waktu?.seconds) return false;
-        const waktu = new Date(a.waktu.seconds*1000).toLocaleDateString();
-        return (
-          a.nama === data.nama &&
-          a.pelajaran === (data.pelajaran || "") &&
-          waktu === today
-        );
-      });
+const q = query(
+  collection(db, `tenants/${tenantId}/absensi`),
+  where("nama", "==", data.nama),
+  where("pelajaran", "==", data.pelajaran || ""),
+  where("waktu", ">=", awalHari),
+  where("waktu", "<=", akhirHari)
+);
 
-      if(sudahAda){
-        showPopup(`${data.nama} sudah absen untuk pelajaran ${data.pelajaran || "-"} hari ini!`);
-        return;
-      }
+const absensiSnap = await getDocs(q);
+
+if (!absensiSnap.empty) {
+  showPopup(`${data.nama} sudah absen untuk pelajaran ${data.pelajaran || "-"} hari ini!`);
+  return; // stop di sini
+}
+      
 
       // ==== SIMPAN ABSENSI BARU ====
       await addDoc(collection(db, `tenants/${tenantId}/absensi`), {
