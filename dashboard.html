@@ -22,7 +22,7 @@ body, html {margin:0;padding:0;font-family:"Poppins",sans-serif;background:#f0f2
 .form-group{margin-bottom:12px;}
 .form-group label{display:block;margin-bottom:5px;font-weight:500;}
 .form-group input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:14px;}
-.btn-save{background:#7494ec;color:#fff;padding:10px 15px;border:none;border-radius:8px;cursor:pointer;font-weight:600;margin-top:5px;font-size:14px;width:auto;display:inline-block;}
+.btn-save{background:#7494ec;color:#fff;padding:10px 15px;border:none;border-radius:8px;cursor:pointer;font-weight:600;margin-top:5px;font-size:14px;}
 .btn-save:hover{background:#5a78c7;}
 #reader{width:100%;max-width:400px;margin:10px auto;}
 .popup{position:fixed;top:15px;right:15px;background:#4caf50;color:#fff;padding:10px 15px;border-radius:8px;display:none;z-index:999;}
@@ -120,7 +120,8 @@ td button {
         </thead>
         <tbody id="siswaTable"></tbody>
       </table>
-      <button type="button" class="btn-save" onclick="exportSiswa()">Export Excel</button>
+      <div <button type="button" class="btn-save" onclick="exportSiswa()">Export Excel</button>
+    </div>
   </div>
 
   <!-- Scan QR -->
@@ -424,11 +425,7 @@ async function loadAbsensi(){
   const snap = await getDocs(q);
   snap.forEach(docSnap=>{
     const data = docSnap.data();
-let waktu;
-if (data.waktu?.seconds) {
-  waktu = new Date(data.waktu.seconds * 1000).toLocaleString();
-} else {
-  waktu = new Date(data.waktu).toLocaleString();
+    const waktu = new Date(data.waktu.seconds*1000).toLocaleString();
     if(!date || waktu.startsWith(new Date(date).toLocaleDateString())){
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -451,12 +448,7 @@ async function exportAbsensi(){
   const dataArr=[];
   snap.forEach(docSnap=>{
     const d = docSnap.data();
-    dataArr.push({Nama:d.nama,Kelas:d.kelas,Pelajaran:d.pelajaran,});
-let waktu;
-if (data.waktu?.seconds) {
-  waktu = new Date(data.waktu.seconds * 1000).toLocaleString();
- else {
-  waktu = new Date(data.waktu).toLocaleString()});
+    dataArr.push({Nama:d.nama,Kelas:d.kelas,Pelajaran:d.pelajaran,Waktu:new Date(d.waktu.seconds*1000).toLocaleString()});
   });
   const ws = XLSX.utils.json_to_sheet(dataArr);
   const wb = XLSX.utils.book_new();
