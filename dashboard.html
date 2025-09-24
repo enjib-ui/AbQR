@@ -276,7 +276,7 @@ async function importSiswa(){
       const exists = snap.docs.some(d => d.data().nama===row.Nama && d.data().kelas===row.Kelas);
       if(exists) continue;
       const docRef = await addDoc(collection(db, `tenants/${tenantId}/siswa`), {
-        nama: row.Nama, kelas: row.Kelas, pelajaran: row.Pelajaran, sekolah: row.Sekolah
+        nama: row.Nama, kelas: row.Kelas, pelajaran: row.pelajaran, sekolah: row.Sekolah
       });
       addSiswaRow(docRef.id, row.Nama, row.Kelas, row.Pelajaran, row.Sekolah);
     }
