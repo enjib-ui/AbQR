@@ -233,6 +233,16 @@ getRedirectResult(auth)
     console.error("Error Google:", err);
     alert("Error Google: " + err.message);
   });
+  // ✅ Tambahan: cek kalau user sudah login, langsung redirect
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Kalau user masih login, jangan balik ke halaman login lagi
+    window.location.href = "dashboard.html";
+  }
+});
+  
   
 </script>
 </body>
