@@ -424,7 +424,7 @@ async function loadAbsensi(){
   const snap = await getDocs(q);
   snap.forEach(docSnap=>{
     const data = docSnap.data();
-    const waktu = let waktu;
+let waktu;
 if (data.waktu?.seconds) {
   waktu = new Date(data.waktu.seconds * 1000).toLocaleString();
 } else {
@@ -451,7 +451,8 @@ async function exportAbsensi(){
   const dataArr=[];
   snap.forEach(docSnap=>{
     const d = docSnap.data();
-    dataArr.push({Nama:d.nama,Kelas:d.kelas,Pelajaran:d.pelajaran,let waktu;
+    dataArr.push({Nama:d.nama,Kelas:d.kelas,Pelajaran:d.pelajaran,
+let waktu;
 if (data.waktu?.seconds) {
   waktu = new Date(data.waktu.seconds * 1000).toLocaleString();
 } else {
