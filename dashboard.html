@@ -145,7 +145,7 @@ td button {
     </div>
     <div class="card">
       <table>
-        <thead><tr><th>Nama</th><th>Kelas</th><th>Email</th><th>Waktu</th></tr></thead>
+        <thead><tr><th>Nama</th><th>Kelas</th><th>Pelajaran</th><th>Waktu</th></tr></thead>
         <tbody id="absensiTable"></tbody>
       </table>
     </div>
@@ -376,7 +376,7 @@ function startScanner(){
     if(docSnap.exists()){
       const data = docSnap.data();
       await addDoc(collection(db, `tenants/${tenantId}/absensi`), {
-        nama: data.nama, kelas: data.kelas, email: data.email||"", waktu: new Date()
+        nama: data.nama, kelas: data.kelas, pelajaran: data.pelajaran||"", waktu: new Date()
       });
       showPopup("Berhasil Masuk");
       const li = document.createElement("li");
@@ -407,7 +407,7 @@ async function loadAbsensi(){
     const waktu = new Date(data.waktu.seconds*1000).toLocaleString();
     if(!date || waktu.startsWith(new Date(date).toLocaleDateString())){
       const tr = document.createElement("tr");
-      tr.innerHTML=`<td>${data.nama}</td><td>${data.kelas}</td><td>${data.email}</td><td>${waktu}</td>`;
+      tr.innerHTML=`<td>${data.nama}</td><td>${data.kelas}</td><td>${data.pelajaran}</td><td>${waktu}</td>`;
       tbody.appendChild(tr);
     }
   });
@@ -421,7 +421,7 @@ async function exportAbsensi(){
   const dataArr=[];
   snap.forEach(docSnap=>{
     const d = docSnap.data();
-    dataArr.push({Nama:d.nama,Kelas:d.kelas,Email:d.email,Waktu:new Date(d.waktu.seconds*1000).toLocaleString()});
+    dataArr.push({Nama:d.nama,Kelas:d.kelas,Pelajaran:d.pelajaran,Waktu:new Date(d.waktu.seconds*1000).toLocaleString()});
   });
   const ws = XLSX.utils.json_to_sheet(dataArr);
   const wb = XLSX.utils.book_new();
