@@ -424,7 +424,11 @@ async function loadAbsensi(){
   const snap = await getDocs(q);
   snap.forEach(docSnap=>{
     const data = docSnap.data();
-    const waktu = new Date(data.waktu.seconds*1000).toLocaleString();
+    const waktu = let waktu;
+if (data.waktu?.seconds) {
+  waktu = new Date(data.waktu.seconds * 1000).toLocaleString();
+} else {
+  waktu = new Date(data.waktu).toLocaleString();
     if(!date || waktu.startsWith(new Date(date).toLocaleDateString())){
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -447,7 +451,11 @@ async function exportAbsensi(){
   const dataArr=[];
   snap.forEach(docSnap=>{
     const d = docSnap.data();
-    dataArr.push({Nama:d.nama,Kelas:d.kelas,Pelajaran:d.pelajaran,Waktu:new Date(d.waktu.seconds*1000).toLocaleString()});
+    dataArr.push({Nama:d.nama,Kelas:d.kelas,Pelajaran:d.pelajaran,let waktu;
+if (data.waktu?.seconds) {
+  waktu = new Date(data.waktu.seconds * 1000).toLocaleString();
+} else {
+  waktu = new Date(data.waktu).toLocaleString()});
   });
   const ws = XLSX.utils.json_to_sheet(dataArr);
   const wb = XLSX.utils.book_new();
