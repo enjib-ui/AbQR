@@ -18,7 +18,7 @@ body, html {margin:0;padding:0;font-family:"Poppins",sans-serif;background:#f0f2
 .sidebar .logout{margin-top:auto;color:#f8d7da;}
 .content {margin-left:240px;padding:15px;transition: margin-left 0.3s;}
 .content h1{color:#333;margin-bottom:15px;font-size:18px;}
-.card{background:#fff;padding:15px;margin-bottom:15px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
+.card{background:#fff;padding:15px;margin-bottom:15px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);overflow-x: auto;}
 .form-group{margin-bottom:12px;}
 .form-group label{display:block;margin-bottom:5px;font-weight:500;}
 .form-group input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:14px;}
@@ -27,9 +27,16 @@ body, html {margin:0;padding:0;font-family:"Poppins",sans-serif;background:#f0f2
 #reader{width:100%;max-width:400px;margin:10px auto;}
 .popup{position:fixed;top:15px;right:15px;background:#4caf50;color:#fff;padding:10px 15px;border-radius:8px;display:none;z-index:999;}
 .absensi-list{margin-top:15px;max-height:250px;overflow-y:auto;}
-table{width:100%;border-collapse:collapse;margin-top:15px;}
-th,td{border:1px solid #ddd;padding:6px;text-align:center;font-size:13px;}
-th{background:#f2f2f2;}
+table{width:100%;border-collapse:collapse;margin-top:15px;table-layout:auto;}
+th,td{border:1px solid #ddd;padding:6px;text-align:center;font-size:13px;white-space: nowrap;}
+th{background:#f2f2f2;font-weight: 600;}
+td div[id^="qr-"] {
+  display: flex;
+  justify-content: center;
+  }
+td button {
+  margin-top: 5px;
+  }
 @media screen and (max-width:768px){
   .sidebar{position:fixed;transform:translateX(-100%);z-index:2000;}
   .close-btn {
