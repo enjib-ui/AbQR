@@ -115,6 +115,7 @@ td button {
             <th>Pelajaran</th>
             <th>Nama Sekolah</th>
             <th>QR Code</th>
+            <th>Aksi</th>
           </tr>
         </thead>
         <tbody id="siswaTable"></tbody>
@@ -304,6 +305,13 @@ function addSiswaRow(id, nama, kelas, pelajaran, sekolah){
               class="btn-save" 
               style="padding:4px 8px;font-size:12px;">Download</button>
     </td>
+    <td>
+    <button onclick="hapusSiswa('${id}')" 
+            class="btn-hapus"
+            style="padding:4px 8px;font-size:12px;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;">
+      Hapus
+    </button>
+  </td>
   `;
   tbody.prepend(tr);
 
@@ -364,6 +372,18 @@ function downloadQR(id, nama){
 }
 
 window.downloadQR = downloadQR;
+  import { deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+async function hapusSiswa(id){
+  if(!tenantId) return;
+  if(confirm("Yakin ingin menghapus siswa ini?")){
+    await deleteDoc(doc(db, `tenants/${tenantId}/siswa`, id));
+    showPopup("Siswa berhasil dihapus");
+    loadSiswa(); // refresh tabel
+  }
+}
+window.hapusSiswa = hapusSiswa;
+  
                                         
 
 // Scan QR
