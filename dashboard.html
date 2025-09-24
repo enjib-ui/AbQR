@@ -347,7 +347,8 @@ function downloadQR(id, nama){
   // Buat canvas baru untuk gabungkan QR + Nama
   const canvas = document.createElement("canvas");
   const size = 160;
-  canvas.width = size + 20;
+  const topMargin = 20
+  canvas.width = size;
   canvas.height = size + 40; // ruang untuk nama
   const ctx = canvas.getContext("2d");
 
