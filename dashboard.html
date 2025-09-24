@@ -407,7 +407,13 @@ async function loadAbsensi(){
     const waktu = new Date(data.waktu.seconds*1000).toLocaleString();
     if(!date || waktu.startsWith(new Date(date).toLocaleDateString())){
       const tr = document.createElement("tr");
-      tr.innerHTML=`<td>${data.nama}</td><td>${data.kelas}</td><td>${data.pelajaran}</td><td>${waktu}</td>`;
+      tr.innerHTML = `
+  <td>${data.nama || ""}</td>
+  <td>${data.kelas || ""}</td>
+  <td>${data.pelajaran || "-"}</td>
+  <td>${waktu}</td>
+`;
+
       tbody.appendChild(tr);
     }
   });
