@@ -391,21 +391,49 @@ window.hapusSiswa = hapusSiswa;
 function startScanner(){
   if(!tenantId) return;
   const html5QrCode = new Html5Qrcode("reader");
+
   html5QrCode.start({facingMode:"environment"}, {fps:10, qrbox:250}, async decodedText=>{
     const docRef = doc(db, `tenants/${tenantId}/siswa`, decodedText);
     const docSnap = await getDoc(docRef);
+
     if(docSnap.exists()){
       const data = docSnap.data();
-      await addDoc(collection(db, `tenants/${tenantId}/absensi`), {
-        nama: data.nama, kelas: data.kelas, pelajaran: data.pelajaran||"", waktu: new Date()
+
+      const today = new Date().toLocaleDateString(); // format tanggal
+      const absensiSnap = await getDocs(collection(db, `tenants/${tenantId}/absensi`));
+
+      const sudahAda = absensiSnap.docs.some(d=>{
+        const a = d.data();
+        if(!a.waktu?.seconds) return false;
+        const waktu = new Date(a.waktu.seconds*1000).toLocaleDateString();
+        return (
+          a.nama === data.nama &&
+          a.pelajaran === (data.pelajaran || "") &&
+          waktu === today
+        );
       });
+
+      if(sudahAda){
+        showPopup(`${data.nama} sudah absen untuk pelajaran ${data.pelajaran || "-"} hari ini!`);
+        return;
+      }
+
+      // ==== SIMPAN ABSENSI BARU ====
+      await addDoc(collection(db, `tenants/${tenantId}/absensi`), {
+        nama: data.nama,
+        kelas: data.kelas,
+        pelajaran: data.pelajaran || "",
+        waktu: new Date()
+      });
+
       showPopup("Berhasil Masuk");
       const li = document.createElement("li");
-      li.textContent = `${data.nama} - ${data.kelas} - ${new Date().toLocaleTimeString()}`;
+      li.textContent = `${data.nama} - ${data.kelas} - ${data.pelajaran || "-"} - ${new Date().toLocaleTimeString()}`;
       document.getElementById("scanResult").prepend(li);
     }
   }, ()=>{});
 }
+  
 
 // Popup
 function showPopup(msg){
