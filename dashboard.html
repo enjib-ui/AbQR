@@ -101,6 +101,7 @@ td button {
       <div style="margin-top:10px;">
         <input type="file" id="importFile" accept=".xlsx">
         <button type="button" class="btn-save" onclick="importSiswa()">Import Excel</button>
+        <button type="button" class="btn-save" onclick="downloadTemplate()">Download Template Excel</button>
       </div>
     </div>
 
@@ -454,6 +455,24 @@ async function exportAbsensi(){
   XLSX.utils.book_append_sheet(wb, ws, "Absensi");
   XLSX.writeFile(wb, "DataAbsensi.xlsx");
 }
+// Download template Excel untuk tambah siswa
+function downloadTemplate(){
+  // Header kolom sesuai field tambah siswa
+  const data = [
+    {Nama: "", Kelas: "", Pelajaran: "", Sekolah: ""}
+  ];
+
+  // Buat worksheet dari data kosong dengan header
+  const ws = XLSX.utils.json_to_sheet(data, {skipHeader: false});
+
+  // Buat workbook baru
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "TemplateSiswa");
+
+  // Simpan sebagai file Excel
+  XLSX.writeFile(wb, "Template_Tambah_Siswa.xlsx");
+}
+  
 
 // Export Siswa
 async function exportSiswa(){
