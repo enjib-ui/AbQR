@@ -222,17 +222,6 @@ document.getElementById("googleLogin").addEventListener("click",(e)=>{
 });
 
 // ✅ Ambil hasil login setelah redirect balik
-getRedirectResult(auth)
-  .then((result) => {
-    if (result && result.user) {
-      // Kalau berhasil login Google
-      window.location.href = "dashboard.html";
-    }
-  })
-  .catch((err) => {
-    console.error("Error Google:", err);
-    alert("Error Google: " + err.message);
-  });
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import { 
