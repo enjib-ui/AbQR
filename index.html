@@ -215,93 +215,35 @@
       .catch(err=> alert("Error: " + err.message));
   });
 
-  // ✅ Login Google pakai Redirect
+  // ✅ Login Google pakai Redirect (lebih aman untuk GitHub Pages & mobile)
 document.getElementById("googleLogin").addEventListener("click",(e)=>{
   e.preventDefault();
   signInWithRedirect(auth, provider);
 });
 
-// ✅ Ambil hasil login setelah redirect balik
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-  import { 
-    getAuth, 
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword, 
-    GoogleAuthProvider, 
-    signInWithRedirect, 
-    getRedirectResult,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-
-  // 🔹 Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyBKFobPaqznvZdOMCXCh9D4d9jVEopq6DQ",
-    authDomain: "abqr-7ec2a.firebaseapp.com",
-    projectId: "abqr-7ec2a",
-    storageBucket: "abqr-7ec2a.firebasestorage.app",
-    messagingSenderId: "908334703141",
-    appId: "1:908334703141:web:3dad64af321d59f55395cc"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
-
-  // 🔹 Toggle animasi
-  const container = document.querySelector('.container');
-  document.querySelector('.register-btn').addEventListener('click',()=>container.classList.add('active'));
-  document.querySelector('.login-btn').addEventListener('click',()=>container.classList.remove('active'));
-
-  // 🔹 Register Email
-  document.getElementById("registerForm").addEventListener("submit",(e)=>{
-    e.preventDefault();
-    const email = document.getElementById("registerEmail").value;
-    const password = document.getElementById("registerPassword").value;
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(userCredential=>{
-        window.location.href="dashboard.html";
-      })
-      .catch(err=> alert("Error: " + err.message));
-  });
-
-  // 🔹 Login Email
-  document.getElementById("loginForm").addEventListener("submit",(e)=>{
-    e.preventDefault();
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
-    signInWithEmailAndPassword(auth, email, password)
-      .then(userCredential=>{
-        window.location.href="dashboard.html";
-      })
-      .catch(err=> alert("Error: " + err.message));
-  });
-
-  // 🔹 Login Google pakai Redirect
-  document.getElementById("googleLogin").addEventListener("click",(e)=>{
-    e.preventDefault();
-    signInWithRedirect(auth, provider);
-  });
-
-  // 🔹 Ambil hasil login setelah redirect balik
-  getRedirectResult(auth)
-    .then((result) => {
-      if (result && result.user) {
-        console.log("Google login sukses:", result.user.email);
-        window.location.href = "dashboard.html";
-      }
-    })
-    .catch((err) => {
-      console.error("Error getRedirectResult:", err.message);
-    });
-
-  // 🔹 Kalau user sudah login (misal refresh), langsung redirect
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
+// ✅ Ambil hasil login setelah redirect balik ke index.html
+getRedirectResult(auth)
+  .then((result) => {
+    if (result && result.user) {
+      alert("Login Google sukses: " + result.user.email);
       window.location.href = "dashboard.html";
     }
+  })
+  .catch((err) => {
+    console.error("Error Google:", err);
+    alert("Error Google: " + err.message);
   });
-</script>
+  // ✅ Tambahan: cek kalau user sudah login, langsung redirect
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Kalau user masih login, jangan balik ke halaman login lagi
+    window.location.href = "dashboard.html";
+  }
+});
   
+  
+</script>
 </body>
 </html>
